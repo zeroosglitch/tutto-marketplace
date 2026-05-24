@@ -1,0 +1,1289 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2870
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fmodern\fcharset0 Courier;\f1\fnil\fcharset0 Menlo-Regular;\f2\fswiss\fcharset0 Helvetica;
+\f3\fnil\fcharset0 HelveticaNeue;}
+{\colortbl;\red255\green255\blue255;\red211\green127\blue255;\red28\green28\blue29;\red70\green137\blue204;
+\red23\green23\blue23;\red202\green202\blue202;\red212\green212\blue212;\red194\green126\blue101;\red79\green123\blue61;
+\red167\green197\blue152;\red252\green126\blue252;\red20\green20\blue21;\red140\green211\blue254;\red54\green192\blue160;
+\red238\green46\blue56;\red74\green76\blue83;\red186\green186\blue186;\red114\green114\blue114;}
+{\*\expandedcolortbl;;\cssrgb\c86667\c60000\c100000;\cssrgb\c14510\c14510\c14902;\cssrgb\c33725\c61176\c83922;
+\cssrgb\c11765\c11765\c11765;\cssrgb\c83137\c83137\c83137;\cssrgb\c86275\c86275\c86275;\cssrgb\c80784\c56863\c47059;\cssrgb\c37647\c54510\c30588;
+\cssrgb\c70980\c80784\c65882;\cssrgb\c100000\c60000\c99216;\cssrgb\c10196\c10196\c10588;\cssrgb\c61176\c86275\c99608;\cssrgb\c23922\c78824\c69020;
+\cssrgb\c95686\c27843\c27843;\cssrgb\c36078\c37255\c40000;\cssrgb\c77647\c77647\c77647;\cssrgb\c52157\c52157\c52157;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs28 \cf2 \cb3 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 /app/backend/server.py\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs26 \cf4 \cb5 \strokec4 from\cf6 \strokec6  fastapi \cf4 \strokec4 import\cf6 \strokec6  FastAPI\cf7 \strokec7 ,\cf6 \strokec6  APIRouter\cb1 \
+\cf4 \cb5 \strokec4 from\cf6 \strokec6  dotenv \cf4 \strokec4 import\cf6 \strokec6  load_dotenv\cb1 \
+\cf4 \cb5 \strokec4 from\cf6 \strokec6  starlette.middleware.cors \cf4 \strokec4 import\cf6 \strokec6  CORSMiddleware\cb1 \
+\cf4 \cb5 \strokec4 from\cf6 \strokec6  motor.motor_asyncio \cf4 \strokec4 import\cf6 \strokec6  AsyncIOMotorClient\cb1 \
+\cf4 \cb5 \strokec4 import\cf6 \strokec6  os\cb1 \
+\cf4 \cb5 \strokec4 import\cf6 \strokec6  logging\cb1 \
+\cf4 \cb5 \strokec4 from\cf6 \strokec6  pathlib \cf4 \strokec4 import\cf6 \strokec6  Path\cb1 \
+\cf4 \cb5 \strokec4 from\cf6 \strokec6  pydantic \cf4 \strokec4 import\cf6 \strokec6  BaseModel\cf7 \strokec7 ,\cf6 \strokec6  Field\cb1 \
+\cf4 \cb5 \strokec4 from\cf6 \strokec6  typing \cf4 \strokec4 import\cf6 \strokec6  List\cb1 \
+\cf4 \cb5 \strokec4 import\cf6 \strokec6  uuid\cb1 \
+\cf4 \cb5 \strokec4 from\cf6 \strokec6  datetime \cf4 \strokec4 import\cf6 \strokec6  datetime\cb1 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb5 ROOT_DIR = Path\cf7 \strokec7 (\cf6 \strokec6 __file__\cf7 \strokec7 )\cf6 \strokec6 .parent\cb1 \
+\cb5 load_dotenv\cf7 \strokec7 (\cf6 \strokec6 ROOT_DIR / \cf8 \strokec8 '.env'\cf7 \strokec7 )\cf6 \cb1 \strokec6 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf9 \cb5 \strokec9 # MongoDB connection\cf6 \cb1 \strokec6 \
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb5 mongo_url = os.environ\cf7 \strokec7 [\cf8 \strokec8 'MONGO_URL'\cf7 \strokec7 ]\cf6 \cb1 \strokec6 \
+\cb5 client = AsyncIOMotorClient\cf7 \strokec7 (\cf6 \strokec6 mongo_url\cf7 \strokec7 )\cf6 \cb1 \strokec6 \
+\cb5 db = client\cf7 \strokec7 [\cf6 \strokec6 os.environ\cf7 \strokec7 [\cf8 \strokec8 'DB_NAME'\cf7 \strokec7 ]]\cf6 \cb1 \strokec6 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf9 \cb5 \strokec9 # Create the main app without a prefix\cf6 \cb1 \strokec6 \
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb5 app = FastAPI\cf7 \strokec7 ()\cf6 \cb1 \strokec6 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf9 \cb5 \strokec9 # Create a router with the /api prefix\cf6 \cb1 \strokec6 \
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb5 api_router = APIRouter\cf7 \strokec7 (\cf6 \strokec6 prefix=\cf8 \strokec8 "/api"\cf7 \strokec7 )\cf6 \cb1 \strokec6 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf9 \cb5 \strokec9 # Define Models\cf6 \cb1 \strokec6 \
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb5 \strokec4 class\cf6 \strokec6  StatusCheck\cf7 \strokec7 (\cf6 \strokec6 BaseModel\cf7 \strokec7 ):\cf6 \cb1 \strokec6 \
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb5     \cf4 \strokec4 id\cf7 \strokec7 :\cf6 \strokec6  \cf4 \strokec4 str\cf6 \strokec6  = Field\cf7 \strokec7 (\cf6 \strokec6 default_factory=\cf4 \strokec4 lambda\cf7 \strokec7 :\cf6 \strokec6  \cf4 \strokec4 str\cf7 \strokec7 (\cf6 \strokec6 uuid.uuid4\cf7 \strokec7 ()))\cf6 \cb1 \strokec6 \
+\cb5     client_name\cf7 \strokec7 :\cf6 \strokec6  \cf4 \strokec4 str\cf6 \cb1 \strokec6 \
+\cb5     timestamp\cf7 \strokec7 :\cf6 \strokec6  datetime = Field\cf7 \strokec7 (\cf6 \strokec6 default_factory=datetime.utcnow\cf7 \strokec7 )\cf6 \cb1 \strokec6 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb5 \strokec4 class\cf6 \strokec6  StatusCheckCreate\cf7 \strokec7 (\cf6 \strokec6 BaseModel\cf7 \strokec7 ):\cf6 \cb1 \strokec6 \
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb5     client_name\cf7 \strokec7 :\cf6 \strokec6  \cf4 \strokec4 str\cf6 \cb1 \strokec6 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf9 \cb5 \strokec9 # Add your routes to the router instead of directly to app\cf6 \cb1 \strokec6 \
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb5 \strokec4 @api_router\cf6 \strokec6 .get\cf7 \strokec7 (\cf8 \strokec8 "/"\cf7 \strokec7 )\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 async\cf6 \strokec6  \cf4 \strokec4 def\cf6 \strokec6  root\cf7 \strokec7 ():\cf6 \cb1 \strokec6 \
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb5     \cf4 \strokec4 return\cf6 \strokec6  \cf7 \strokec7 \{\cf8 \strokec8 "message"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Hello World"\cf7 \strokec7 \}\cf6 \cb1 \strokec6 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb5 \strokec4 @api_router\cf6 \strokec6 .post\cf7 \strokec7 (\cf8 \strokec8 "/status"\cf7 \strokec7 ,\cf6 \strokec6  response_model=StatusCheck\cf7 \strokec7 )\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 async\cf6 \strokec6  \cf4 \strokec4 def\cf6 \strokec6  create_status_check\cf7 \strokec7 (\cf4 \strokec4 input\cf7 \strokec7 :\cf6 \strokec6  StatusCheckCreate\cf7 \strokec7 ):\cf6 \cb1 \strokec6 \
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb5     status_dict = \cf4 \strokec4 input\cf6 \strokec6 .\cf4 \strokec4 dict\cf7 \strokec7 ()\cf6 \cb1 \strokec6 \
+\cb5     status_obj = StatusCheck\cf7 \strokec7 (\cf6 \strokec6 **status_dict\cf7 \strokec7 )\cf6 \cb1 \strokec6 \
+\cb5     \cf4 \strokec4 _\cf6 \strokec6  = \cf4 \strokec4 await\cf6 \strokec6  db.status_checks.insert_one\cf7 \strokec7 (\cf6 \strokec6 status_obj.\cf4 \strokec4 dict\cf7 \strokec7 ())\cf6 \cb1 \strokec6 \
+\cb5     \cf4 \strokec4 return\cf6 \strokec6  status_obj\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb5 \strokec4 @api_router\cf6 \strokec6 .get\cf7 \strokec7 (\cf8 \strokec8 "/status"\cf7 \strokec7 ,\cf6 \strokec6  response_model=List\cf7 \strokec7 [\cf6 \strokec6 StatusCheck\cf7 \strokec7 ])\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 async\cf6 \strokec6  \cf4 \strokec4 def\cf6 \strokec6  get_status_checks\cf7 \strokec7 ():\cf6 \cb1 \strokec6 \
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb5     status_checks = \cf4 \strokec4 await\cf6 \strokec6  db.status_checks.find\cf7 \strokec7 ()\cf6 \strokec6 .to_list\cf7 \strokec7 (\cf10 \strokec10 1000\cf7 \strokec7 )\cf6 \cb1 \strokec6 \
+\cb5     \cf4 \strokec4 return\cf6 \strokec6  \cf7 \strokec7 [\cf6 \strokec6 StatusCheck\cf7 \strokec7 (\cf6 \strokec6 **status_check\cf7 \strokec7 )\cf6 \strokec6  \cf4 \strokec4 for\cf6 \strokec6  status_check \cf4 \strokec4 in\cf6 \strokec6  status_checks\cf7 \strokec7 ]\cf6 \cb1 \strokec6 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf9 \cb5 \strokec9 # Include the router in the main app\cf6 \cb1 \strokec6 \
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb5 app.include_router\cf7 \strokec7 (\cf6 \strokec6 api_router\cf7 \strokec7 )\cf6 \cb1 \strokec6 \
+\
+\cb5 app.add_middleware\cf7 \strokec7 (\cf6 \cb1 \strokec6 \
+\cb5     CORSMiddleware\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     allow_credentials=\cf4 \strokec4 True\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     allow_origins=\cf7 \strokec7 [\cf8 \strokec8 "*"\cf7 \strokec7 ],\cf6 \cb1 \strokec6 \
+\cb5     allow_methods=\cf7 \strokec7 [\cf8 \strokec8 "*"\cf7 \strokec7 ],\cf6 \cb1 \strokec6 \
+\cb5     allow_headers=\cf7 \strokec7 [\cf8 \strokec8 "*"\cf7 \strokec7 ],\cf6 \cb1 \strokec6 \
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb5 \strokec7 )\cf6 \cb1 \strokec6 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf9 \cb5 \strokec9 # Configure logging\cf6 \cb1 \strokec6 \
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb5 logging.basicConfig\cf7 \strokec7 (\cf6 \cb1 \strokec6 \
+\cb5     level=logging.INFO\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf4 \strokec4 format\cf6 \strokec6 =\cf8 \strokec8 '%(asctime)s - %(name)s - %(levelname)s - %(message)s'\cf6 \cb1 \strokec6 \
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb5 \strokec7 )\cf6 \cb1 \strokec6 \
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb5 logger = logging.getLogger\cf7 \strokec7 (\cf4 \strokec4 __name__\cf7 \strokec7 )\cf6 \cb1 \strokec6 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb5 \strokec4 @app\cf6 \strokec6 .on_event\cf7 \strokec7 (\cf8 \strokec8 "shutdown"\cf7 \strokec7 )\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 async\cf6 \strokec6  \cf4 \strokec4 def\cf6 \strokec6  shutdown_db_client\cf7 \strokec7 ():\cf6 \cb1 \strokec6 \
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb5     client.close\cf7 \strokec7 ()\cf6 \cb1 \strokec6 \
+\
+\
+\
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs28 \cf2 \cb3 \strokec2 /app/frontend/app/index.tsx\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs26 \cf4 \cb5 \strokec4 import\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  Text\cf7 \strokec7 ,\cf6 \strokec6  View\cf7 \strokec7 ,\cf6 \strokec6  StyleSheet\cf7 \strokec7 ,\cf6 \strokec6  Image \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \strokec4 from\cf6 \strokec6  \cf8 \strokec8 "react-native"\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb5 const EXPO_PUBLIC_BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\
+\cb5 export default function Index\cf7 \strokec7 ()\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5   console.log\cf7 \strokec7 (\cf6 \strokec6 EXPO_PUBLIC_BACKEND_URL\cf7 \strokec7 ,\cf6 \strokec6  \cf8 \strokec8 "EXPO_PUBLIC_BACKEND_URL"\cf7 \strokec7 );\cf6 \cb1 \strokec6 \
+\
+\cb5   \cf4 \strokec4 return\cf6 \strokec6  \cf7 \strokec7 (\cf6 \cb1 \strokec6 \
+\cb5     <View style=\cf7 \strokec7 \{\cf6 \strokec6 styles.container\cf7 \strokec7 \}\cf6 \strokec6 >\cb1 \
+\cb5       <Image\cb1 \
+\cb5         source=\cf7 \strokec7 \{\cf6 \strokec6 require\cf7 \strokec7 (\cf8 \strokec8 "../assets/images/app-image.png"\cf7 \strokec7 )\}\cf6 \cb1 \strokec6 \
+\cb5         style=\cf7 \strokec7 \{\cf6 \strokec6 styles.image\cf7 \strokec7 \}\cf6 \cb1 \strokec6 \
+\cb5       />\cb1 \
+\cb5     </View>\cb1 \
+\cb5   \cf7 \strokec7 );\cf6 \cb1 \strokec6 \
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb5 \strokec7 \}\cf6 \cb1 \strokec6 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb5 const styles = StyleSheet.create\cf7 \strokec7 (\{\cf6 \cb1 \strokec6 \
+\cb5   container\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     flex\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 1\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     backgroundColor\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#0c0c0c"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     alignItems\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "center"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     justifyContent\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "center"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5   image\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     width\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "100%"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     height\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "100%"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     resizeMode\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "contain"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb5 \strokec7 \});\cf6 \cb1 \strokec6 \
+\
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs28 \cf2 \cb3 \strokec2 /app/frontend/.env\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs26 \cf6 \cb5 \strokec6 EXPO_TUNNEL_SUBDOMAIN=d9b2de1b-d788\cf10 \strokec10 -4\cf6 \strokec6 b88\cf10 \strokec10 -9\cf6 \strokec6 bb9\cf10 \strokec10 -96486\cf6 \strokec6 b529c3e\cb1 \
+\cb5 EXPO_PACKAGER_HOSTNAME=https\cf7 \strokec7 :\cf6 \strokec6 //d9b2de1b-d788\cf10 \strokec10 -4\cf6 \strokec6 b88\cf10 \strokec10 -9\cf6 \strokec6 bb9\cf10 \strokec10 -96486\cf6 \strokec6 b529c3e.preview.emergentagent.com\cb1 \
+\cb5 EXPO_PUBLIC_BACKEND_URL=https\cf7 \strokec7 :\cf6 \strokec6 //d9b2de1b-d788\cf10 \strokec10 -4\cf6 \strokec6 b88\cf10 \strokec10 -9\cf6 \strokec6 bb9\cf10 \strokec10 -96486\cf6 \strokec6 b529c3e.preview.emergentagent.com\cb1 \
+\cb5 EXPO_USE_FAST_RESOLVER=\cf8 \strokec8 "1"\cf6 \cb1 \strokec6 \
+\cb5 METRO_CACHE_ROOT=/app/frontend/.metro-cache\cb1 \
+\cb5 EXPO_PACKAGER_PROXY_URL=https\cf7 \strokec7 :\cf6 \strokec6 //d9b2de1b-d788\cf10 \strokec10 -4\cf6 \strokec6 b88\cf10 \strokec10 -9\cf6 \strokec6 bb9\cf10 \strokec10 -96486\cf6 \strokec6 b529c3e.preview.emergentagent.com\cb1 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs28 \cf2 \cb3 \strokec2 /app/backend/.env\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs26 \cf6 \cb5 \strokec6 MONGO_URL=\cf8 \strokec8 "mongodb://localhost:27017"\cf6 \cb1 \strokec6 \
+\cb5 DB_NAME=\cf8 \strokec8 "test_database"\cf6 \cb1 \strokec6 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs28 \cf2 \cb3 \strokec2 /app/frontend/package.json\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs26 \cf7 \cb5 \strokec7 \{\cf6 \cb1 \strokec6 \
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb5   \cf8 \strokec8 "name"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "frontend"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5   \cf8 \strokec8 "main"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "expo-router/entry"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5   \cf8 \strokec8 "version"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "1.0.0"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5   \cf8 \strokec8 "scripts"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "start"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "expo start"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "reset-project"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "node ./scripts/reset-project.js"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "android"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "expo start --android"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "ios"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "expo start --ios"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "web"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "expo start --web"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "lint"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "expo lint"\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5   \cf8 \strokec8 "dependencies"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "@babel/runtime"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "^7.20.6"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "@expo/metro-runtime"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "^6.1.2"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "@expo/ngrok"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "^4.1.3"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "@expo/vector-icons"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "^15.0.3"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "@react-native-async-storage/async-storage"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "2.2.0"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "@react-navigation/bottom-tabs"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "^7.3.10"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "@react-navigation/elements"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "^2.3.8"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "@react-navigation/native"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "^7.1.6"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "@react-navigation/native-stack"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "^7.3.10"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "expo"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "~54.0.34"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "expo-blur"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "~15.0.8"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "expo-constants"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "~18.0.13"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "expo-font"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "~14.0.11"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "expo-haptics"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "~15.0.8"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "expo-image"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "~3.0.11"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "expo-linear-gradient"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "~15.0.8"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "expo-linking"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "~8.0.11"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "expo-router"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "~6.0.22"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "expo-secure-store"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "~15.0.8"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "expo-splash-screen"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "~31.0.13"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "expo-status-bar"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "~3.0.9"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "expo-symbols"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "~1.0.8"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "expo-system-ui"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "~6.0.9"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "expo-web-browser"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "~15.0.10"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "react"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "19.1.0"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "react-dom"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "19.1.0"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "react-native"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "0.81.5"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "react-native-dotenv"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "^3.4.11"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "react-native-gesture-handler"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "~2.28.0"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "react-native-reanimated"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "~4.1.1"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "react-native-safe-area-context"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "~5.6.0"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "react-native-screens"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "~4.16.0"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "react-native-web"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "~0.21.0"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "react-native-webview"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "13.15.0"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "react-native-worklets"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "0.5.1"\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5   \cf8 \strokec8 "devDependencies"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "@babel/core"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "^7.25.2"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "@types/react"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "~19.1.0"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "eslint"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "^9.25.0"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "eslint-config-expo"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "~10.0.0"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "typescript"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "~5.9.3"\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5   \cf8 \strokec8 "private"\cf7 \strokec7 :\cf6 \strokec6  true\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5   \cf8 \strokec8 "packageManager"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"\cf6 \cb1 \strokec6 \
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb5 \strokec7 \}\cf6 \cb1 \strokec6 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs28 \cf2 \cb3 \strokec2 /app/frontend/app/_layout.tsx\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs26 \cf4 \cb5 \strokec4 import\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  Stack \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \strokec4 from\cf6 \strokec6  \cf8 \strokec8 "expo-router"\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 import\cf6 \strokec6  * \cf4 \strokec4 as\cf6 \strokec6  SplashScreen \cf4 \strokec4 from\cf6 \strokec6  \cf8 \strokec8 "expo-splash-screen"\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 import\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  useEffect \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \strokec4 from\cf6 \strokec6  \cf8 \strokec8 "react"\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 import\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  useIconFonts \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \strokec4 from\cf6 \strokec6  \cf8 \strokec8 "@/src/hooks/use-icon-fonts"\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb5 // Keep the native splash visible \cf4 \strokec4 from\cf6 \strokec6  cold start until icon fonts register.\cb1 \
+\cb5 // Required because \cf4 \strokec4 @expo\cf6 \strokec6 /vector-icons\cf8 \strokec8 ' componentDidMount fallback fires\cf6 \cb1 \strokec6 \
+\cb5 // Font.loadAsync against a broken vendor path \cf4 \strokec4 if\cf6 \strokec6  \cf4 \strokec4 any\cf6 \strokec6  <Icon> mounts before\cb1 \
+\cb5 // the family \cf4 \strokec4 is\cf6 \strokec6  registered \'97 which throws on Android Expo Go.\cb1 \
+\cb5 SplashScreen.preventAutoHideAsync\cf7 \strokec7 ();\cf6 \cb1 \strokec6 \
+\
+\cb5 export default function RootLayout\cf7 \strokec7 ()\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5   const \cf7 \strokec7 [\cf6 \strokec6 loaded\cf7 \strokec7 ,\cf6 \strokec6  error\cf7 \strokec7 ]\cf6 \strokec6  = useIconFonts\cf7 \strokec7 ();\cf6 \cb1 \strokec6 \
+\
+\cb5   useEffect\cf7 \strokec7 (()\cf6 \strokec6  => \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     \cf4 \strokec4 if\cf6 \strokec6  \cf7 \strokec7 (\cf6 \strokec6 loaded || error\cf7 \strokec7 )\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5       SplashScreen.hideAsync\cf7 \strokec7 ();\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \}\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \},\cf6 \strokec6  \cf7 \strokec7 [\cf6 \strokec6 loaded\cf7 \strokec7 ,\cf6 \strokec6  error\cf7 \strokec7 ]);\cf6 \cb1 \strokec6 \
+\
+\cb5   // If the CDN \cf4 \strokec4 is\cf6 \strokec6  unreachable we fall through on error rather than wedging\cb1 \
+\cb5   // the app \'97 icons will tofu\cf7 \strokec7 ,\cf6 \strokec6  but the app still boots.\cb1 \
+\cb5   \cf4 \strokec4 if\cf6 \strokec6  \cf7 \strokec7 (\cf6 \strokec6 !loaded && !error\cf7 \strokec7 )\cf6 \strokec6  \cf4 \strokec4 return\cf6 \strokec6  null\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\
+\cb5   \cf4 \strokec4 return\cf6 \strokec6  <Stack screenOptions=\cf7 \strokec7 \{\{\cf6 \strokec6  headerShown\cf7 \strokec7 :\cf6 \strokec6  false \cf7 \strokec7 \}\}\cf6 \strokec6  />\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb5 \strokec7 \}\cf6 \cb1 \strokec6 \
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs28 \cf2 \cb3 \strokec2 /app/backend/requirements.txt\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs26 \cf6 \cb5 \strokec6 fastapi==\cf10 \strokec10 0.110.1\cf6 \cb1 \strokec6 \
+\cb5 uvicorn==\cf10 \strokec10 0.25.0\cf6 \cb1 \strokec6 \
+\cb5 boto3>=\cf10 \strokec10 1.34.129\cf6 \cb1 \strokec6 \
+\cb5 requests-oauthlib>=\cf10 \strokec10 2.0.0\cf6 \cb1 \strokec6 \
+\cb5 cryptography>=\cf10 \strokec10 42.0.8\cf6 \cb1 \strokec6 \
+\cb5 python-dotenv>=\cf10 \strokec10 1.0.1\cf6 \cb1 \strokec6 \
+\cb5 pymongo==\cf10 \strokec10 4.5.0\cf6 \cb1 \strokec6 \
+\cb5 pydantic>=\cf10 \strokec10 2.6.4\cf6 \cb1 \strokec6 \
+\cb5 email-validator>=\cf10 \strokec10 2.2.0\cf6 \cb1 \strokec6 \
+\cb5 pyjwt>=\cf10 \strokec10 2.10.1\cf6 \cb1 \strokec6 \
+\cb5 bcrypt==\cf10 \strokec10 4.1.3\cf6 \cb1 \strokec6 \
+\cb5 passlib>=\cf10 \strokec10 1.7.4\cf6 \cb1 \strokec6 \
+\cb5 tzdata>=\cf10 \strokec10 2024.2\cf6 \cb1 \strokec6 \
+\cb5 motor==\cf10 \strokec10 3.3.1\cf6 \cb1 \strokec6 \
+\cb5 pytest>=\cf10 \strokec10 8.0.0\cf6 \cb1 \strokec6 \
+\cb5 black>=\cf10 \strokec10 24.1.1\cf6 \cb1 \strokec6 \
+\cb5 isort>=\cf10 \strokec10 5.13.2\cf6 \cb1 \strokec6 \
+\cb5 flake8>=\cf10 \strokec10 7.0.0\cf6 \cb1 \strokec6 \
+\cb5 mypy>=\cf10 \strokec10 1.8.0\cf6 \cb1 \strokec6 \
+\cb5 python-jose>=\cf10 \strokec10 3.3.0\cf6 \cb1 \strokec6 \
+\cb5 requests>=\cf10 \strokec10 2.31.0\cf6 \cb1 \strokec6 \
+\cb5 pandas>=\cf10 \strokec10 2.2.0\cf6 \cb1 \strokec6 \
+\cb5 numpy>=\cf10 \strokec10 1.26.0\cf6 \cb1 \strokec6 \
+\cb5 python-multipart>=\cf10 \strokec10 0.0.9\cf6 \cb1 \strokec6 \
+\cb5 jq>=\cf10 \strokec10 1.6.0\cf6 \cb1 \strokec6 \
+\cb5 typer>=\cf10 \strokec10 0.9.0\cf6 \cb1 \strokec6 \
+\cb5 emergentintegrations==\cf10 \strokec10 0.1.0\cf6 \cb1 \strokec6 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs28 \cf2 \cb3 \strokec2 /app/frontend/app.json\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs26 \cf7 \cb5 \strokec7 \{\cf6 \cb1 \strokec6 \
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb5   \cf8 \strokec8 "expo"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "name"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "frontend"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "slug"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "frontend"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "version"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "1.0.0"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "orientation"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "portrait"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "icon"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "./assets/images/icon.png"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "scheme"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "frontend"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "userInterfaceStyle"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "automatic"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "newArchEnabled"\cf7 \strokec7 :\cf6 \strokec6  true\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "ios"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5       \cf8 \strokec8 "supportsTablet"\cf7 \strokec7 :\cf6 \strokec6  true\cb1 \
+\cb5     \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "android"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5       \cf8 \strokec8 "adaptiveIcon"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5         \cf8 \strokec8 "foregroundImage"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "./assets/images/adaptive-icon.png"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5         \cf8 \strokec8 "backgroundColor"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#000"\cf6 \cb1 \strokec6 \
+\cb5       \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5       \cf8 \strokec8 "edgeToEdgeEnabled"\cf7 \strokec7 :\cf6 \strokec6  true\cb1 \
+\cb5     \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "web"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5       \cf8 \strokec8 "bundler"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "metro"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf8 \strokec8 "output"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "static"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf8 \strokec8 "favicon"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "./assets/images/favicon.png"\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "plugins"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 [\cf6 \cb1 \strokec6 \
+\cb5       \cf8 \strokec8 "expo-router"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf7 \strokec7 [\cf6 \cb1 \strokec6 \
+\cb5         \cf8 \strokec8 "expo-splash-screen"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5         \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5           \cf8 \strokec8 "image"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "./assets/images/splash-icon.png"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5           \cf8 \strokec8 "imageWidth"\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 200\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5           \cf8 \strokec8 "resizeMode"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "contain"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5           \cf8 \strokec8 "backgroundColor"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#000"\cf6 \cb1 \strokec6 \
+\cb5         \cf7 \strokec7 \}\cf6 \cb1 \strokec6 \
+\cb5       \cf7 \strokec7 ]\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 ],\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "experiments"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5       \cf8 \strokec8 "typedRoutes"\cf7 \strokec7 :\cf6 \strokec6  true\cb1 \
+\cb5     \cf7 \strokec7 \}\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \}\cf6 \cb1 \strokec6 \
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb5 \strokec7 \}\cf6 \cb1 \strokec6 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs28 \cf11 \cb12 \strokec11 /app/design_guidelines.json\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf7 \cb5 \strokec7 \{\cf6 \cb1 \strokec6 \
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb5   \cf13 \strokec13 "app_name"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Tutto Marketplace"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5   \cf13 \strokec13 "personality"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "1 iOS-Native Clean"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5   \cf13 \strokec13 "personality_one_liner"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "A premium, structured, and image-forward marketplace where the products are the hero, grounded in warm terracotta accents."\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5   \cf13 \strokec13 "theme"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "light"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "surface"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#FAFAFA"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "onSurface"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#121212"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "surfaceSecondary"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#FFFFFF"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "onSurfaceSecondary"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#121212"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "surfaceTertiary"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#F4F4F5"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "onSurfaceTertiary"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#52525B"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "surfaceInverse"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#18181B"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "onSurfaceInverse"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#FAFAFA"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "brand"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#C84C31"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "brandPrimary"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#C84C31"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "onBrandPrimary"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#FFFFFF"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "brandSecondary"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#F3D8D1"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "onBrandSecondary"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#C84C31"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "brandTertiary"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#FAECE9"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "onBrandTertiary"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#A43921"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "success"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#2E7D32"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "onSuccess"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#FFFFFF"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "warning"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#E65100"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "onWarning"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#FFFFFF"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "error"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#C62828"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "onError"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#FFFFFF"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "info"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#424242"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "onInfo"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#FFFFFF"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "border"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#E4E4E7"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "borderStrong"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#D4D4D8"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "divider"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#F4F4F5"\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "dark"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "surface"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#121212"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "onSurface"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#FAFAFA"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "surfaceSecondary"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#1C1C1E"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "onSurfaceSecondary"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#FAFAFA"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "surfaceTertiary"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#2C2C2E"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "onSurfaceTertiary"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#A1A1AA"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "surfaceInverse"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#FAFAFA"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "onSurfaceInverse"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#121212"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "brand"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#DB654B"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "brandPrimary"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#DB654B"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "onBrandPrimary"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#FFFFFF"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "brandSecondary"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#3F221D"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "onBrandSecondary"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#FADED8"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "brandTertiary"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#291613"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "onBrandTertiary"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#DB654B"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "success"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#388E3C"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "onSuccess"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#FFFFFF"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "warning"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#F57C00"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "onWarning"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#FFFFFF"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "error"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#D32F2F"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "onError"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#FFFFFF"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "info"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#9E9E9E"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "onInfo"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#121212"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "border"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#2C2C2E"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "borderStrong"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#3A3A3C"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "divider"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "#1C1C1E"\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \}\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5   \cf13 \strokec13 "typography"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "displayFontFamily"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Manrope"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "textFontFamily"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Inter"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "scale"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "sm"\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 14\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "base"\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 16\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "lg"\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 18\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "xl"\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 22\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "2xl"\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 28\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "weight_cap"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "500 max anywhere in the app - size carries hierarchy, never weight."\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5   \cf13 \strokec13 "spacing"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "rule"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Handle spacing correctly dont have extra spaces where its not required, handle padding and margin corectly and subtle for buttons and components"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "xs"\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 4\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "sm"\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 8\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "md"\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 12\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "lg"\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 16\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "xl"\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 24\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "2xl"\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 32\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "3xl"\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 48\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5   \cf13 \strokec13 "radius_tokens"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "sm"\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 6\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "md"\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 12\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "lg"\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 20\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "pill"\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 999\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5   \cf13 \strokec13 "shadow_tier"\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 1\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5   \cf13 \strokec13 "navigation"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "bottom_tabs"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5   \cf13 \strokec13 "icon_set"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "MaterialCommunityIcons"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5   \cf13 \strokec13 "glassmorphism"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "enabled"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 true\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "do's"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 [\cf6 \cb1 \strokec6 \
+\cb5       \cf8 \strokec8 "Sticky headers over scrolling content"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf8 \strokec8 "Bottom tab bar when content scrolls behind it"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf8 \strokec8 "Featured/hero cards layered over imagery"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf8 \strokec8 "Bottom-sheet handles and headers"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf8 \strokec8 "Primary CTA container when sticky at bottom"\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 ],\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "dont's"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 [\cf6 \cb1 \strokec6 \
+\cb5       \cf8 \strokec8 "Every button, list rows, or inputs"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf8 \strokec8 "When underlying content lacks contrast (enforce >=70% tinted base layer underneath blur)"\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 ]\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5   \cf13 \strokec13 "haptics"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "enabled"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 true\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "NO_TOLERANCE"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "always have switcher in settings or profile page"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "library"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "expo-haptics"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "events"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "tab_switch"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "selection"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "toggle_switch_flip"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "selection"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "segmented_control_change"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "selection"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "filter_chip_select"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "selection"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "slider_drag_end"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "selection"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "primary_cta_tap"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "impact_medium"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "submission_success"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "notification_success"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "submission_error"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "notification_error"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "pull_to_refresh_trigger"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "impact_light"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "long_press_confirm"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "impact_heavy"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "add_to_cart"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "impact_medium"\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "wiring"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Haptic calls live inside these components (Button primary, TabBar item, SegmentedControl, FilterChip, switch, slider) they fire automatically on use. Dev agent does NOT wire haptics ad-hoc per screen."\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5   \cf13 \strokec13 "platform_libraries"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "tabs"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "ios"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "NativeTabs (from expo-router/unstable-native-tabs)"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "android"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Tabs (from expo-router)"\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "glass"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "ios"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "expo-glass-effect"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "android"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "expo-blur"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "low_end_android_fallback"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "solid surfaceSecondary"\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "image"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "expo-image"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "gradient"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "expo-linear-gradient"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "blur"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "expo-blur"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "haptics"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "expo-haptics"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "safe_area"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "react-native-safe-area-context"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "bottom_sheet"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "@gorhom/bottom-sheet"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "animation"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "react-native-reanimated"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "gesture"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "react-native-gesture-handler"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "icons"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "@expo/vector-icons"\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5   \cf13 \strokec13 "chip_row"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "height"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "56pt"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "chip_height"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "36pt"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "behavior"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "horizontal scroll only, outside the scrollable list as a sibling in the sticky header stack"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "states"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "renders identically across Loading / Empty / Error / Loaded"\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5   \cf13 \strokec13 "screens"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 [\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "name"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Home / Discover"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "purpose"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "A rich discovery feed featuring premium hero sections and curated marketplace items."\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "states"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5         \cf13 \strokec13 "loading"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Full screen skeleton mirroring the hero card and 2-column grid structure below."\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5         \cf13 \strokec13 "empty"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Empty state illustration + 'No stores open right now' text + 'Refresh' CTA."\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5         \cf13 \strokec13 "error"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Error message indicating failed network load + 'Retry' CTA."\cf6 \cb1 \strokec6 \
+\cb5       \cf7 \strokec7 \}\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "name"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Search & Explore"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "purpose"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Global search and filter discovery for specific products across all stores."\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "states"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5         \cf13 \strokec13 "loading"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Skeleton grid of product cards + skeleton filter chips."\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5         \cf13 \strokec13 "empty"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Empty search illustration + 'No products found matching your criteria'."\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5         \cf13 \strokec13 "error"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Failed to load search results + 'Retry' CTA."\cf6 \cb1 \strokec6 \
+\cb5       \cf7 \strokec7 \}\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "name"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Cart & Checkout"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "purpose"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Review selected items, modify quantities, and proceed to Stripe payment."\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "states"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5         \cf13 \strokec13 "loading"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Skeleton list items mirroring cart rows."\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5         \cf13 \strokec13 "empty"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Empty cart illustration + 'Your cart is empty' + 'Start Shopping' CTA."\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5         \cf13 \strokec13 "error"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Unable to process cart/payment + 'Retry' CTA."\cf6 \cb1 \strokec6 \
+\cb5       \cf7 \strokec7 \}\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "name"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Seller Dashboard"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "purpose"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Manage store inventory, add products, and track incoming orders."\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "states"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5         \cf13 \strokec13 "loading"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Skeleton product list for store inventory."\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5         \cf13 \strokec13 "empty"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Empty store illustration + 'You haven't added any products yet' + 'Add Product' CTA."\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5         \cf13 \strokec13 "error"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Failed to load seller data + 'Retry' CTA."\cf6 \cb1 \strokec6 \
+\cb5       \cf7 \strokec7 \}\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "name"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Orders"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "purpose"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "View order history for buyers, or incoming requests for sellers."\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "states"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5         \cf13 \strokec13 "loading"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Skeleton list of order receipts."\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5         \cf13 \strokec13 "empty"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Empty orders illustration + 'No past orders yet'."\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5         \cf13 \strokec13 "error"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Failed to fetch orders + 'Retry' CTA."\cf6 \cb1 \strokec6 \
+\cb5       \cf7 \strokec7 \}\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \}\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 ],\cf6 \cb1 \strokec6 \
+\cb5   \cf13 \strokec13 "images"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "hero_home_banner"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "light"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "https://images.unsplash.com/photo-1631679706909-1844bbd07221?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA3MDR8MHwxfHNlYXJjaHwyfHxtaW5pbWFsaXN0JTIwaG9tZSUyMGRlY29yJTIwbGl2aW5nJTIwcm9vbXxlbnwwfHx8fDE3Nzk2NTIyNzF8MA&ixlib=rb-4.1.0&q=85"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "dark"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "https://images.pexels.com/photos/1571472/pexels-photo-1571472.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "alt"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Minimalist premium living room representing curated products"\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "empty_cart"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "light"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "https://static.prod-images.emergentagent.com/jobs/db562b79-e938-45f4-b638-b10f8d284b96/images/2b5b08307179ddc52a20019bad75e2e4ae69c1959be5a28f5c8e9494939eb060.png"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "dark"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "https://static.prod-images.emergentagent.com/jobs/db562b79-e938-45f4-b638-b10f8d284b96/images/2b5b08307179ddc52a20019bad75e2e4ae69c1959be5a28f5c8e9494939eb060.png"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "alt"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Abstract 3D rendering of an empty shopping tote bag"\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "empty_orders"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "light"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "https://static.prod-images.emergentagent.com/jobs/db562b79-e938-45f4-b638-b10f8d284b96/images/02a36ad0b89a11542924ac5df49132f3ea178dfae0c48815bb95768c453974cc.png"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "dark"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "https://static.prod-images.emergentagent.com/jobs/db562b79-e938-45f4-b638-b10f8d284b96/images/02a36ad0b89a11542924ac5df49132f3ea178dfae0c48815bb95768c453974cc.png"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "alt"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Abstract 3D rendering of an empty cardboard box"\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "empty_store"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "light"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "https://static.prod-images.emergentagent.com/jobs/db562b79-e938-45f4-b638-b10f8d284b96/images/cdabc8a82f9efc842ce07ef733702ef57ed420b7aa6a02994c0bca672b8b3797.png"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "dark"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "https://static.prod-images.emergentagent.com/jobs/db562b79-e938-45f4-b638-b10f8d284b96/images/cdabc8a82f9efc842ce07ef733702ef57ed420b7aa6a02994c0bca672b8b3797.png"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "alt"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Abstract 3D rendering of an empty retail shelf"\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "empty_search"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "light"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "https://static.prod-images.emergentagent.com/jobs/db562b79-e938-45f4-b638-b10f8d284b96/images/4d20d3273e9ad010fe3949314c4419c45abd21d4446646841e8f25a8c38500b7.png"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "dark"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "https://static.prod-images.emergentagent.com/jobs/db562b79-e938-45f4-b638-b10f8d284b96/images/4d20d3273e9ad010fe3949314c4419c45abd21d4446646841e8f25a8c38500b7.png"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "alt"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Abstract 3D rendering of a magnifying glass on a blank receipt"\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "product_placeholder_1"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "light"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "https://images.pexels.com/photos/12495668/pexels-photo-12495668.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "dark"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "https://images.pexels.com/photos/12495668/pexels-photo-12495668.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "alt"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Handcrafted leather wallet close-up"\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5     \cf13 \strokec13 "product_placeholder_2"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "light"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "https://images.unsplash.com/photo-1641302063626-add5862ed2fc?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTB8MHwxfHNlYXJjaHwyfHxtaW5pbWFsaXN0JTIwaG9tZSUyMGRlY29yJTIwbGl2aW5nJTIwcm9vbXxlbnwwfHx8fDE3Nzk2NTIyNzF8MA&ixlib=rb-4.1.0&q=85"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "dark"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "https://images.unsplash.com/photo-1641302063626-add5862ed2fc?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTB8MHwxfHNlYXJjaHwyfHxtaW5pbWFsaXN0JTIwaG9tZSUyMGRlY29yJTIwbGl2aW5nJTIwcm9vbXxlbnwwfHx8fDE3Nzk2NTIyNzF8MA&ixlib=rb-4.1.0&q=85"\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf13 \strokec13 "alt"\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 "Minimalist handmade ceramic cups"\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \}\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5   \cf13 \strokec13 "instructions_to_main_agent"\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 [\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "Apply iOS-Native Clean aesthetics: strictly use MaterialCommunityIcons, cap font weight at 500, apply 12pt radii (md), and 1-tier shadows."\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "Implement Terracotta (#C84C31) as the primary brand color for both themes. ZERO blue/indigo/purple allowed."\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "Enforce proper sticky headers with safe area consideration. Top filter / category chip rows MUST be treated as chrome, sitting horizontally scrolled outside the main list, matching header glass behavior."\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "All text overlays on hero imagery MUST use a vertical gradient scrim (transparent to >=70% surfaceInverse at the bottom) for readability."\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "Always wire Haptics based on the mapping via a global togglable utility in Settings. The dev agent must NOT wire ad-hoc haptics, rely on standard components (e.g., GButton)."\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 "Ensure all 5 primary data screens respect the required Loading (Skeletons) / Empty (with 3D generated illustrations) / Error states exactly as specced."\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 ]\cf6 \cb1 \strokec6 \
+\pard\pardeftab720\partightenfactor0
+\cf7 \cb5 \strokec7 \}\
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs28 \cf11 \cb12 \strokec11 /app/frontend/src/theme/index.ts\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf8 \cb5 \strokec8 "import \{ useColorScheme \} from 'react-native';\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 export\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  palette \cf7 \strokec7 =\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5   light\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     surface\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#FAFAFA'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     onSurface\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#121212'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     surfaceSecondary\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#FFFFFF'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     onSurfaceSecondary\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#121212'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     surfaceTertiary\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#F4F4F5'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     onSurfaceTertiary\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#52525B'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     surfaceInverse\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#18181B'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     onSurfaceInverse\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#FAFAFA'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     brand\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#C84C31'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     onBrand\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#FFFFFF'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     brandSecondary\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#F3D8D1'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     onBrandSecondary\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#C84C31'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     brandTertiary\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#FAECE9'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     success\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#2E7D32'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     warning\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#E65100'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     error\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#C62828'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     border\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#E4E4E7'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     borderStrong\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#D4D4D8'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     divider\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#F4F4F5'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5   dark\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     surface\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#121212'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     onSurface\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#FAFAFA'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     surfaceSecondary\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#1C1C1E'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     onSurfaceSecondary\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#FAFAFA'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     surfaceTertiary\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#2C2C2E'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     onSurfaceTertiary\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#A1A1AA'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     surfaceInverse\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#FAFAFA'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     onSurfaceInverse\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#121212'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     brand\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#DB654B'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     onBrand\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#FFFFFF'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     brandSecondary\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#3F221D'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     onBrandSecondary\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#FADED8'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     brandTertiary\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#291613'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     success\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#388E3C'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     warning\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#F57C00'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     error\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#D32F2F'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     border\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#2C2C2E'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     borderStrong\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#3A3A3C'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     divider\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#1C1C1E'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cf7 \cb5 \strokec7 \};\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 export\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  spacing \cf7 \strokec7 =\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  xs\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 4\cf7 \strokec7 ,\cf6 \strokec6  sm\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 8\cf7 \strokec7 ,\cf6 \strokec6  md\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 12\cf7 \strokec7 ,\cf6 \strokec6  lg\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 16\cf7 \strokec7 ,\cf6 \strokec6  xl\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 24\cf7 \strokec7 ,\cf6 \strokec6  xxl\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 32\cf7 \strokec7 ,\cf6 \strokec6  xxxl\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 48\cf6 \strokec6  \cf7 \strokec7 \};\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 export\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  radius \cf7 \strokec7 =\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  sm\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 6\cf7 \strokec7 ,\cf6 \strokec6  md\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 12\cf7 \strokec7 ,\cf6 \strokec6  lg\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 20\cf7 \strokec7 ,\cf6 \strokec6  pill\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 999\cf6 \strokec6  \cf7 \strokec7 \};\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 export\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 type\cf6 \cb5 \strokec6  \cf7 \strokec7 =\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5   sm\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 14\cf7 \strokec7 ,\cf6 \strokec6  base\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 16\cf7 \strokec7 ,\cf6 \strokec6  lg\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 18\cf7 \strokec7 ,\cf6 \strokec6  xl\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 22\cf7 \strokec7 ,\cf6 \strokec6  xxl\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 28\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cf7 \cb5 \strokec7 \};\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 export\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 type\cf6 \cb5 \strokec6  \cf14 \cb5 \strokec14 ThemeColors\cf6 \cb5 \strokec6  \cf7 \strokec7 =\cf6 \strokec6  \cf4 \cb5 \strokec4 typeof\cf6 \cb5 \strokec6  palette\cf7 \strokec7 .\cf6 \strokec6 light\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 export\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 function\cf6 \cb5 \strokec6  useTheme\cf7 \strokec7 ():\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  c\cf7 \strokec7 :\cf6 \strokec6  \cf14 \cb5 \strokec14 ThemeColors\cf7 \cb5 \strokec7 ;\cf6 \strokec6  isDark\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 boolean\cf6 \cb5 \strokec6  \cf7 \strokec7 \}\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  scheme \cf7 \strokec7 =\cf6 \strokec6  useColorScheme\cf7 \strokec7 ();\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  isDark \cf7 \strokec7 =\cf6 \strokec6  scheme \cf7 \strokec7 ===\cf6 \strokec6  \cf8 \strokec8 'dark'\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 return\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  c\cf7 \strokec7 :\cf6 \strokec6  isDark \cf7 \strokec7 ?\cf6 \strokec6  palette\cf7 \strokec7 .\cf6 \strokec6 dark \cf7 \strokec7 :\cf6 \strokec6  palette\cf7 \strokec7 .\cf6 \strokec6 light\cf7 \strokec7 ,\cf6 \strokec6  isDark \cf7 \strokec7 \};\cf6 \cb1 \strokec6 \
+\cf7 \cb5 \strokec7 \}\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 export\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  shadow \cf7 \strokec7 =\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5   sm\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     shadowColor\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#000'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     shadowOpacity\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 0.06\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     shadowRadius\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 8\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     shadowOffset\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  width\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 0\cf7 \strokec7 ,\cf6 \strokec6  height\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 2\cf6 \strokec6  \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5     elevation\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 2\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cf7 \cb5 \strokec7 \};\cf6 \cb1 \strokec6 \
+\cf8 \cb5 \strokec8 "\cf6 \cb1 \strokec6 \
+\
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs28 \cf11 \cb12 \strokec11 /app/frontend/src/api/client.ts\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf8 \cb5 \strokec8 "import * as SecureStore from 'expo-secure-store';\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 import\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  \cf14 \cb5 \strokec14 Platform\cf6 \cb5 \strokec6  \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \cb5 \strokec4 from\cf6 \cb5 \strokec6  \cf8 \strokec8 'react-native'\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  \cf14 \cb5 \strokec14 BASE\cf6 \cb5 \strokec6  \cf7 \strokec7 =\cf6 \strokec6  process\cf7 \strokec7 .\cf6 \strokec6 env\cf7 \strokec7 .\cf14 \cb5 \strokec14 EXPO_PUBLIC_BACKEND_URL\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  \cf14 \cb5 \strokec14 TOKEN_KEY\cf6 \cb5 \strokec6  \cf7 \strokec7 =\cf6 \strokec6  \cf8 \strokec8 'tutto_token'\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 async\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 function\cf6 \cb5 \strokec6  getToken\cf7 \strokec7 ():\cf6 \strokec6  \cf14 \cb5 \strokec14 Promise\cf7 \cb5 \strokec7 <\cf4 \cb5 \strokec4 string\cf6 \cb5 \strokec6  \cf7 \strokec7 |\cf6 \strokec6  \cf4 \cb5 \strokec4 null\cf7 \cb5 \strokec7 >\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 if\cf6 \cb5 \strokec6  \cf7 \strokec7 (\cf14 \cb5 \strokec14 Platform\cf7 \cb5 \strokec7 .\cf14 \cb5 \strokec14 OS\cf6 \cb5 \strokec6  \cf7 \strokec7 ===\cf6 \strokec6  \cf8 \strokec8 'web'\cf7 \strokec7 )\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     \cf4 \cb5 \strokec4 try\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  \cf4 \cb5 \strokec4 return\cf6 \cb5 \strokec6  localStorage\cf7 \strokec7 .\cf6 \strokec6 getItem\cf7 \strokec7 (\cf14 \cb5 \strokec14 TOKEN_KEY\cf7 \cb5 \strokec7 );\cf6 \strokec6  \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \cb5 \strokec4 catch\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  \cf4 \cb5 \strokec4 return\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 null\cf7 \cb5 \strokec7 ;\cf6 \strokec6  \cf7 \strokec7 \}\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \}\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 return\cf6 \cb5 \strokec6  \cf14 \cb5 \strokec14 SecureStore\cf7 \cb5 \strokec7 .\cf6 \strokec6 getItemAsync\cf7 \strokec7 (\cf14 \cb5 \strokec14 TOKEN_KEY\cf7 \cb5 \strokec7 );\cf6 \cb1 \strokec6 \
+\cf7 \cb5 \strokec7 \}\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 export\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 async\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 function\cf6 \cb5 \strokec6  setToken\cf7 \strokec7 (\cf6 \strokec6 token\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 )\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 if\cf6 \cb5 \strokec6  \cf7 \strokec7 (\cf14 \cb5 \strokec14 Platform\cf7 \cb5 \strokec7 .\cf14 \cb5 \strokec14 OS\cf6 \cb5 \strokec6  \cf7 \strokec7 ===\cf6 \strokec6  \cf8 \strokec8 'web'\cf7 \strokec7 )\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     \cf4 \cb5 \strokec4 try\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  localStorage\cf7 \strokec7 .\cf6 \strokec6 setItem\cf7 \strokec7 (\cf14 \cb5 \strokec14 TOKEN_KEY\cf7 \cb5 \strokec7 ,\cf6 \strokec6  token\cf7 \strokec7 );\cf6 \strokec6  \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \cb5 \strokec4 catch\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\}\cf6 \cb1 \strokec6 \
+\cb5     \cf4 \cb5 \strokec4 return\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \}\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 await\cf6 \cb5 \strokec6  \cf14 \cb5 \strokec14 SecureStore\cf7 \cb5 \strokec7 .\cf6 \strokec6 setItemAsync\cf7 \strokec7 (\cf14 \cb5 \strokec14 TOKEN_KEY\cf7 \cb5 \strokec7 ,\cf6 \strokec6  token\cf7 \strokec7 );\cf6 \cb1 \strokec6 \
+\cf7 \cb5 \strokec7 \}\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 export\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 async\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 function\cf6 \cb5 \strokec6  clearToken\cf7 \strokec7 ()\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 if\cf6 \cb5 \strokec6  \cf7 \strokec7 (\cf14 \cb5 \strokec14 Platform\cf7 \cb5 \strokec7 .\cf14 \cb5 \strokec14 OS\cf6 \cb5 \strokec6  \cf7 \strokec7 ===\cf6 \strokec6  \cf8 \strokec8 'web'\cf7 \strokec7 )\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     \cf4 \cb5 \strokec4 try\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  localStorage\cf7 \strokec7 .\cf6 \strokec6 removeItem\cf7 \strokec7 (\cf14 \cb5 \strokec14 TOKEN_KEY\cf7 \cb5 \strokec7 );\cf6 \strokec6  \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \cb5 \strokec4 catch\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\}\cf6 \cb1 \strokec6 \
+\cb5     \cf4 \cb5 \strokec4 return\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \}\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 await\cf6 \cb5 \strokec6  \cf14 \cb5 \strokec14 SecureStore\cf7 \cb5 \strokec7 .\cf6 \strokec6 deleteItemAsync\cf7 \strokec7 (\cf14 \cb5 \strokec14 TOKEN_KEY\cf7 \cb5 \strokec7 );\cf6 \cb1 \strokec6 \
+\cf7 \cb5 \strokec7 \}\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 export\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 async\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 function\cf6 \cb5 \strokec6  api\cf7 \strokec7 <\cf14 \cb5 \strokec14 T\cf6 \cb5 \strokec6  \cf7 \strokec7 =\cf6 \strokec6  \cf4 \cb5 \strokec4 any\cf7 \cb5 \strokec7 >(\cf6 \strokec6 path\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ,\cf6 \strokec6  opts\cf7 \strokec7 :\cf6 \strokec6  \cf14 \cb5 \strokec14 RequestInit\cf6 \cb5 \strokec6  \cf7 \strokec7 =\cf6 \strokec6  \cf7 \strokec7 \{\}):\cf6 \strokec6  \cf14 \cb5 \strokec14 Promise\cf7 \cb5 \strokec7 <\cf14 \cb5 \strokec14 T\cf7 \cb5 \strokec7 >\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  token \cf7 \strokec7 =\cf6 \strokec6  \cf4 \cb5 \strokec4 await\cf6 \cb5 \strokec6  getToken\cf7 \strokec7 ();\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  headers\cf7 \strokec7 :\cf6 \strokec6  \cf14 \cb5 \strokec14 Record\cf7 \cb5 \strokec7 <\cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ,\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 >\cf6 \strokec6  \cf7 \strokec7 =\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     \cf8 \strokec8 'Content-Type'\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 'application/json'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 ...(\cf6 \strokec6 opts\cf7 \strokec7 .\cf6 \strokec6 headers \cf4 \cb5 \strokec4 as\cf6 \cb5 \strokec6  \cf14 \cb5 \strokec14 Record\cf7 \cb5 \strokec7 <\cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ,\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 >\cf6 \strokec6  \cf7 \strokec7 ||\cf6 \strokec6  \cf7 \strokec7 \{\}),\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \};\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 if\cf6 \cb5 \strokec6  \cf7 \strokec7 (\cf6 \strokec6 token\cf7 \strokec7 )\cf6 \strokec6  headers\cf7 \strokec7 [\cf8 \strokec8 'Authorization'\cf7 \strokec7 ]\cf6 \strokec6  \cf7 \strokec7 =\cf6 \strokec6  \cf8 \strokec8 `Bearer \cf7 \strokec7 $\{\cf6 \strokec6 token\cf7 \strokec7 \}\cf8 \strokec8 `\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  res \cf7 \strokec7 =\cf6 \strokec6  \cf4 \cb5 \strokec4 await\cf6 \cb5 \strokec6  fetch\cf7 \strokec7 (\cf8 \strokec8 `\cf7 \strokec7 $\{\cf14 \cb5 \strokec14 BASE\cf7 \cb5 \strokec7 \}\cf8 \strokec8 /api\cf7 \strokec7 $\{\cf6 \strokec6 path\cf7 \strokec7 \}\cf8 \strokec8 `\cf7 \strokec7 ,\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  \cf7 \strokec7 ...\cf6 \strokec6 opts\cf7 \strokec7 ,\cf6 \strokec6  headers \cf7 \strokec7 \});\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  text \cf7 \strokec7 =\cf6 \strokec6  \cf4 \cb5 \strokec4 await\cf6 \cb5 \strokec6  res\cf7 \strokec7 .\cf6 \strokec6 text\cf7 \strokec7 ();\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 let\cf6 \cb5 \strokec6  data\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 any\cf6 \cb5 \strokec6  \cf7 \strokec7 =\cf6 \strokec6  \cf4 \cb5 \strokec4 null\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 try\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  data \cf7 \strokec7 =\cf6 \strokec6  text \cf7 \strokec7 ?\cf6 \strokec6  \cf14 \cb5 \strokec14 JSON\cf7 \cb5 \strokec7 .\cf6 \strokec6 parse\cf7 \strokec7 (\cf6 \strokec6 text\cf7 \strokec7 )\cf6 \strokec6  \cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 null\cf7 \cb5 \strokec7 ;\cf6 \strokec6  \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \cb5 \strokec4 catch\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  data \cf7 \strokec7 =\cf6 \strokec6  text\cf7 \strokec7 ;\cf6 \strokec6  \cf7 \strokec7 \}\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 if\cf6 \cb5 \strokec6  \cf7 \strokec7 (!\cf6 \strokec6 res\cf7 \strokec7 .\cf6 \strokec6 ok\cf7 \strokec7 )\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  msg \cf7 \strokec7 =\cf6 \strokec6  data\cf7 \strokec7 ?.\cf6 \strokec6 detail \cf7 \strokec7 ||\cf6 \strokec6  data\cf7 \strokec7 ?.\cf6 \strokec6 message \cf7 \strokec7 ||\cf6 \strokec6  \cf8 \strokec8 `Request failed (\cf7 \strokec7 $\{\cf6 \strokec6 res\cf7 \strokec7 .\cf6 \strokec6 status\cf7 \strokec7 \}\cf8 \strokec8 )`\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5     \cf4 \cb5 \strokec4 throw\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 new\cf6 \cb5 \strokec6  \cf14 \cb5 \strokec14 Error\cf7 \cb5 \strokec7 (\cf4 \cb5 \strokec4 typeof\cf6 \cb5 \strokec6  msg \cf7 \strokec7 ===\cf6 \strokec6  \cf8 \strokec8 'string'\cf6 \strokec6  \cf7 \strokec7 ?\cf6 \strokec6  msg \cf7 \strokec7 :\cf6 \strokec6  \cf14 \cb5 \strokec14 JSON\cf7 \cb5 \strokec7 .\cf6 \strokec6 stringify\cf7 \strokec7 (\cf6 \strokec6 msg\cf7 \strokec7 ));\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \}\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 return\cf6 \cb5 \strokec6  data \cf4 \cb5 \strokec4 as\cf6 \cb5 \strokec6  \cf14 \cb5 \strokec14 T\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cf7 \cb5 \strokec7 \}\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 export\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 type\cf6 \cb5 \strokec6  \cf14 \cb5 \strokec14 User\cf6 \cb5 \strokec6  \cf7 \strokec7 =\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5   id\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   email\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   full_name\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   store_name?: \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   has_store\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 boolean\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   created_at\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cf7 \cb5 \strokec7 \};\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 export\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 type\cf6 \cb5 \strokec6  \cf14 \cb5 \strokec14 Product\cf6 \cb5 \strokec6  \cf7 \strokec7 =\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5   id\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   seller_id\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   store_name\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   name\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   description\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   price\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 number\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   currency\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   image?: \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   category\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   stock\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 number\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   created_at\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cf7 \cb5 \strokec7 \};\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 export\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 type\cf6 \cb5 \strokec6  \cf14 \cb5 \strokec14 CartItem\cf6 \cb5 \strokec6  \cf7 \strokec7 =\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5   product_id\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   name\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   price\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 number\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   image?: \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   quantity\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 number\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   seller_id\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   store_name\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cf7 \cb5 \strokec7 \};\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 export\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 type\cf6 \cb5 \strokec6  \cf14 \cb5 \strokec14 Cart\cf6 \cb5 \strokec6  \cf7 \strokec7 =\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  user_id\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \strokec6  items\cf7 \strokec7 :\cf6 \strokec6  \cf14 \cb5 \strokec14 CartItem\cf7 \cb5 \strokec7 [];\cf6 \strokec6  total\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 number\cf7 \cb5 \strokec7 ;\cf6 \strokec6  currency\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf6 \cb5 \strokec6  \cf7 \strokec7 \};\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 export\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 type\cf6 \cb5 \strokec6  \cf14 \cb5 \strokec14 Order\cf6 \cb5 \strokec6  \cf7 \strokec7 =\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5   id\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   user_id\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   items\cf7 \strokec7 :\cf6 \strokec6  \cf14 \cb5 \strokec14 CartItem\cf7 \cb5 \strokec7 [];\cf6 \cb1 \strokec6 \
+\cb5   total\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 number\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   currency\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   status\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   stripe_session_id?: \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   created_at\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cf7 \cb5 \strokec7 \};\cf6 \cb1 \strokec6 \
+\cf8 \cb5 \strokec8 "\cf6 \cb1 \strokec6 \
+\
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs28 \cf11 \cb12 \strokec11 /app/frontend/src/context/AuthContext.tsx\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf8 \cb5 \strokec8 "import React, \{ createContext, useContext, useEffect, useState, useCallback \} from 'react';\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 import\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  api\cf7 \strokec7 ,\cf6 \strokec6  clearToken\cf7 \strokec7 ,\cf6 \strokec6  setToken\cf7 \strokec7 ,\cf6 \strokec6  \cf14 \cb5 \strokec14 User\cf6 \cb5 \strokec6  \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \cb5 \strokec4 from\cf6 \cb5 \strokec6  \cf8 \strokec8 '@/src/api/client'\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 type\cf6 \cb5 \strokec6  \cf14 \cb5 \strokec14 AuthState\cf6 \cb5 \strokec6  \cf7 \strokec7 =\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5   user\cf7 \strokec7 :\cf6 \strokec6  \cf14 \cb5 \strokec14 User\cf6 \cb5 \strokec6  \cf7 \strokec7 |\cf6 \strokec6  \cf4 \cb5 \strokec4 null\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   loading\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 boolean\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   signIn\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 (\cf6 \strokec6 email\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ,\cf6 \strokec6  password\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 )\cf6 \strokec6  \cf7 \strokec7 =>\cf6 \strokec6  \cf14 \cb5 \strokec14 Promise\cf7 \cb5 \strokec7 <\cf4 \cb5 \strokec4 void\cf7 \cb5 \strokec7 >;\cf6 \cb1 \strokec6 \
+\cb5   signUp\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 (\cf6 \strokec6 payload\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  email\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \strokec6  password\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \strokec6  full_name\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \strokec6  store_name?: \cf4 \cb5 \strokec4 string\cf6 \cb5 \strokec6  \cf7 \strokec7 \})\cf6 \strokec6  \cf7 \strokec7 =>\cf6 \strokec6  \cf14 \cb5 \strokec14 Promise\cf7 \cb5 \strokec7 <\cf4 \cb5 \strokec4 void\cf7 \cb5 \strokec7 >;\cf6 \cb1 \strokec6 \
+\cb5   signOut\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 ()\cf6 \strokec6  \cf7 \strokec7 =>\cf6 \strokec6  \cf14 \cb5 \strokec14 Promise\cf7 \cb5 \strokec7 <\cf4 \cb5 \strokec4 void\cf7 \cb5 \strokec7 >;\cf6 \cb1 \strokec6 \
+\cb5   refresh\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 ()\cf6 \strokec6  \cf7 \strokec7 =>\cf6 \strokec6  \cf14 \cb5 \strokec14 Promise\cf7 \cb5 \strokec7 <\cf4 \cb5 \strokec4 void\cf7 \cb5 \strokec7 >;\cf6 \cb1 \strokec6 \
+\cf7 \cb5 \strokec7 \};\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  \cf14 \cb5 \strokec14 AuthCtx\cf6 \cb5 \strokec6  \cf7 \strokec7 =\cf6 \strokec6  createContext\cf7 \strokec7 <\cf14 \cb5 \strokec14 AuthState\cf6 \cb5 \strokec6  \cf7 \strokec7 |\cf6 \strokec6  \cf4 \cb5 \strokec4 null\cf7 \cb5 \strokec7 >(\cf4 \cb5 \strokec4 null\cf7 \cb5 \strokec7 );\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 export\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 function\cf6 \cb5 \strokec6  \cf14 \cb5 \strokec14 AuthProvider\cf7 \cb5 \strokec7 (\{\cf6 \strokec6  children \cf7 \strokec7 \}:\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  children\cf7 \strokec7 :\cf6 \strokec6  \cf14 \cb5 \strokec14 React\cf7 \cb5 \strokec7 .\cf14 \cb5 \strokec14 ReactNode\cf6 \cb5 \strokec6  \cf7 \strokec7 \})\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  \cf7 \strokec7 [\cf6 \strokec6 user\cf7 \strokec7 ,\cf6 \strokec6  setUser\cf7 \strokec7 ]\cf6 \strokec6  \cf7 \strokec7 =\cf6 \strokec6  useState\cf7 \strokec7 <\cf14 \cb5 \strokec14 User\cf6 \cb5 \strokec6  \cf7 \strokec7 |\cf6 \strokec6  \cf4 \cb5 \strokec4 null\cf7 \cb5 \strokec7 >(\cf4 \cb5 \strokec4 null\cf7 \cb5 \strokec7 );\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  \cf7 \strokec7 [\cf6 \strokec6 loading\cf7 \strokec7 ,\cf6 \strokec6  setLoading\cf7 \strokec7 ]\cf6 \strokec6  \cf7 \strokec7 =\cf6 \strokec6  useState\cf7 \strokec7 (\cf4 \cb5 \strokec4 true\cf7 \cb5 \strokec7 );\cf6 \cb1 \strokec6 \
+\
+\cb5   \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  refresh \cf7 \strokec7 =\cf6 \strokec6  useCallback\cf7 \strokec7 (\cf4 \cb5 \strokec4 async\cf6 \cb5 \strokec6  \cf7 \strokec7 ()\cf6 \strokec6  \cf7 \strokec7 =>\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     \cf4 \cb5 \strokec4 try\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5       \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  u \cf7 \strokec7 =\cf6 \strokec6  \cf4 \cb5 \strokec4 await\cf6 \cb5 \strokec6  api\cf7 \strokec7 <\cf14 \cb5 \strokec14 User\cf7 \cb5 \strokec7 >(\cf8 \strokec8 '/auth/me'\cf7 \strokec7 );\cf6 \cb1 \strokec6 \
+\cb5       setUser\cf7 \strokec7 (\cf6 \strokec6 u\cf7 \strokec7 );\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \cb5 \strokec4 catch\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5       setUser\cf7 \strokec7 (\cf4 \cb5 \strokec4 null\cf7 \cb5 \strokec7 );\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \}\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \},\cf6 \strokec6  \cf7 \strokec7 []);\cf6 \cb1 \strokec6 \
+\
+\cb5   useEffect\cf7 \strokec7 (()\cf6 \strokec6  \cf7 \strokec7 =>\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 (\cf4 \cb5 \strokec4 async\cf6 \cb5 \strokec6  \cf7 \strokec7 ()\cf6 \strokec6  \cf7 \strokec7 =>\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5       \cf4 \cb5 \strokec4 await\cf6 \cb5 \strokec6  refresh\cf7 \strokec7 ();\cf6 \cb1 \strokec6 \
+\cb5       setLoading\cf7 \strokec7 (\cf4 \cb5 \strokec4 false\cf7 \cb5 \strokec7 );\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \})();\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \},\cf6 \strokec6  \cf7 \strokec7 [\cf6 \strokec6 refresh\cf7 \strokec7 ]);\cf6 \cb1 \strokec6 \
+\
+\cb5   \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  signIn \cf7 \strokec7 =\cf6 \strokec6  useCallback\cf7 \strokec7 (\cf4 \cb5 \strokec4 async\cf6 \cb5 \strokec6  \cf7 \strokec7 (\cf6 \strokec6 email\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ,\cf6 \strokec6  password\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 )\cf6 \strokec6  \cf7 \strokec7 =>\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  res \cf7 \strokec7 =\cf6 \strokec6  \cf4 \cb5 \strokec4 await\cf6 \cb5 \strokec6  api\cf7 \strokec7 <\{\cf6 \strokec6  access_token\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \strokec6  user\cf7 \strokec7 :\cf6 \strokec6  \cf14 \cb5 \strokec14 User\cf6 \cb5 \strokec6  \cf7 \strokec7 \}>(\cf8 \strokec8 '/auth/login'\cf7 \strokec7 ,\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5       method\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 'POST'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       body\cf7 \strokec7 :\cf6 \strokec6  \cf14 \cb5 \strokec14 JSON\cf7 \cb5 \strokec7 .\cf6 \strokec6 stringify\cf7 \strokec7 (\{\cf6 \strokec6  email\cf7 \strokec7 ,\cf6 \strokec6  password \cf7 \strokec7 \}),\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \});\cf6 \cb1 \strokec6 \
+\cb5     \cf4 \cb5 \strokec4 await\cf6 \cb5 \strokec6  setToken\cf7 \strokec7 (\cf6 \strokec6 res\cf7 \strokec7 .\cf6 \strokec6 access_token\cf7 \strokec7 );\cf6 \cb1 \strokec6 \
+\cb5     setUser\cf7 \strokec7 (\cf6 \strokec6 res\cf7 \strokec7 .\cf6 \strokec6 user\cf7 \strokec7 );\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \},\cf6 \strokec6  \cf7 \strokec7 []);\cf6 \cb1 \strokec6 \
+\
+\cb5   \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  signUp \cf7 \strokec7 =\cf6 \strokec6  useCallback\cf7 \strokec7 (\cf4 \cb5 \strokec4 async\cf6 \cb5 \strokec6  \cf7 \strokec7 (\cf6 \strokec6 payload\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  email\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \strokec6  password\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \strokec6  full_name\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \strokec6  store_name?: \cf4 \cb5 \strokec4 string\cf6 \cb5 \strokec6  \cf7 \strokec7 \})\cf6 \strokec6  \cf7 \strokec7 =>\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  res \cf7 \strokec7 =\cf6 \strokec6  \cf4 \cb5 \strokec4 await\cf6 \cb5 \strokec6  api\cf7 \strokec7 <\{\cf6 \strokec6  access_token\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \strokec6  user\cf7 \strokec7 :\cf6 \strokec6  \cf14 \cb5 \strokec14 User\cf6 \cb5 \strokec6  \cf7 \strokec7 \}>(\cf8 \strokec8 '/auth/register'\cf7 \strokec7 ,\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5       method\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 'POST'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       body\cf7 \strokec7 :\cf6 \strokec6  \cf14 \cb5 \strokec14 JSON\cf7 \cb5 \strokec7 .\cf6 \strokec6 stringify\cf7 \strokec7 (\cf6 \strokec6 payload\cf7 \strokec7 ),\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \});\cf6 \cb1 \strokec6 \
+\cb5     \cf4 \cb5 \strokec4 await\cf6 \cb5 \strokec6  setToken\cf7 \strokec7 (\cf6 \strokec6 res\cf7 \strokec7 .\cf6 \strokec6 access_token\cf7 \strokec7 );\cf6 \cb1 \strokec6 \
+\cb5     setUser\cf7 \strokec7 (\cf6 \strokec6 res\cf7 \strokec7 .\cf6 \strokec6 user\cf7 \strokec7 );\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \},\cf6 \strokec6  \cf7 \strokec7 []);\cf6 \cb1 \strokec6 \
+\
+\cb5   \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  signOut \cf7 \strokec7 =\cf6 \strokec6  useCallback\cf7 \strokec7 (\cf4 \cb5 \strokec4 async\cf6 \cb5 \strokec6  \cf7 \strokec7 ()\cf6 \strokec6  \cf7 \strokec7 =>\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     \cf4 \cb5 \strokec4 await\cf6 \cb5 \strokec6  clearToken\cf7 \strokec7 ();\cf6 \cb1 \strokec6 \
+\cb5     setUser\cf7 \strokec7 (\cf4 \cb5 \strokec4 null\cf7 \cb5 \strokec7 );\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \},\cf6 \strokec6  \cf7 \strokec7 []);\cf6 \cb1 \strokec6 \
+\
+\cb5   \cf4 \cb5 \strokec4 return\cf6 \cb5 \strokec6  \cf7 \strokec7 (\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 <\cf14 \cb5 \strokec14 AuthCtx\cf7 \cb5 \strokec7 .\cf14 \cb5 \strokec14 Provider\cf6 \cb5 \strokec6  value\cf7 \strokec7 =\{\{\cf6 \strokec6  user\cf7 \strokec7 ,\cf6 \strokec6  loading\cf7 \strokec7 ,\cf6 \strokec6  signIn\cf7 \strokec7 ,\cf6 \strokec6  signUp\cf7 \strokec7 ,\cf6 \strokec6  signOut\cf7 \strokec7 ,\cf6 \strokec6  refresh \cf7 \strokec7 \}\}>\cf6 \cb1 \strokec6 \
+\cb5       \cf7 \strokec7 \{\cf6 \strokec6 children\cf7 \strokec7 \}\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 </\cf14 \cb5 \strokec14 AuthCtx\cf7 \cb5 \strokec7 .\cf14 \cb5 \strokec14 Provider\cf7 \cb5 \strokec7 >\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 );\cf6 \cb1 \strokec6 \
+\cf7 \cb5 \strokec7 \}\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 export\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 function\cf6 \cb5 \strokec6  useAuth\cf7 \strokec7 ()\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  ctx \cf7 \strokec7 =\cf6 \strokec6  useContext\cf7 \strokec7 (\cf14 \cb5 \strokec14 AuthCtx\cf7 \cb5 \strokec7 );\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 if\cf6 \cb5 \strokec6  \cf7 \strokec7 (!\cf6 \strokec6 ctx\cf7 \strokec7 )\cf6 \strokec6  \cf4 \cb5 \strokec4 throw\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 new\cf6 \cb5 \strokec6  \cf14 \cb5 \strokec14 Error\cf7 \cb5 \strokec7 (\cf8 \strokec8 'useAuth must be used within AuthProvider'\cf7 \strokec7 );\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 return\cf6 \cb5 \strokec6  ctx\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cf7 \cb5 \strokec7 \}\cf6 \cb1 \strokec6 \
+\cf8 \cb5 \strokec8 "\cf6 \cb1 \strokec6 \
+\
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs28 \cf11 \cb12 \strokec11 /app/frontend/src/components/GButton.tsx\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf8 \cb5 \strokec8 "import React from 'react';\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 import\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  \cf14 \cb5 \strokec14 Pressable\cf7 \cb5 \strokec7 ,\cf6 \strokec6  \cf14 \cb5 \strokec14 Text\cf7 \cb5 \strokec7 ,\cf6 \strokec6  \cf14 \cb5 \strokec14 StyleSheet\cf7 \cb5 \strokec7 ,\cf6 \strokec6  \cf14 \cb5 \strokec14 ActivityIndicator\cf7 \cb5 \strokec7 ,\cf6 \strokec6  \cf14 \cb5 \strokec14 View\cf7 \cb5 \strokec7 ,\cf6 \strokec6  \cf14 \cb5 \strokec14 ViewStyle\cf6 \cb5 \strokec6  \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \cb5 \strokec4 from\cf6 \cb5 \strokec6  \cf8 \strokec8 'react-native'\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 import\cf6 \cb5 \strokec6  \cf7 \strokec7 *\cf6 \strokec6  \cf4 \cb5 \strokec4 as\cf6 \cb5 \strokec6  \cf14 \cb5 \strokec14 Haptics\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 from\cf6 \cb5 \strokec6  \cf8 \strokec8 'expo-haptics'\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 import\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  useTheme\cf7 \strokec7 ,\cf6 \strokec6  radius\cf7 \strokec7 ,\cf6 \strokec6  spacing \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \cb5 \strokec4 from\cf6 \cb5 \strokec6  \cf8 \strokec8 '@/src/theme'\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 type\cf6 \cb5 \strokec6  \cf14 \cb5 \strokec14 Variant\cf6 \cb5 \strokec6  \cf7 \strokec7 =\cf6 \strokec6  \cf8 \strokec8 'primary'\cf6 \strokec6  \cf7 \strokec7 |\cf6 \strokec6  \cf8 \strokec8 'secondary'\cf6 \strokec6  \cf7 \strokec7 |\cf6 \strokec6  \cf8 \strokec8 'ghost'\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 type\cf6 \cb5 \strokec6  \cf14 \cb5 \strokec14 Props\cf6 \cb5 \strokec6  \cf7 \strokec7 =\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5   title\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   onPress?: \cf7 \strokec7 ()\cf6 \strokec6  \cf7 \strokec7 =>\cf6 \strokec6  \cf4 \cb5 \strokec4 void\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   loading?: \cf4 \cb5 \strokec4 boolean\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   disabled?: \cf4 \cb5 \strokec4 boolean\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   variant?: \cf14 \cb5 \strokec14 Variant\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   testID?: \cf4 \cb5 \strokec4 string\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   style?: \cf14 \cb5 \strokec14 ViewStyle\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   fullWidth?: \cf4 \cb5 \strokec4 boolean\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cf7 \cb5 \strokec7 \};\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 export\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 function\cf6 \cb5 \strokec6  \cf14 \cb5 \strokec14 GButton\cf7 \cb5 \strokec7 (\{\cf6 \strokec6  title\cf7 \strokec7 ,\cf6 \strokec6  onPress\cf7 \strokec7 ,\cf6 \strokec6  loading\cf7 \strokec7 ,\cf6 \strokec6  disabled\cf7 \strokec7 ,\cf6 \strokec6  variant \cf7 \strokec7 =\cf6 \strokec6  \cf8 \strokec8 'primary'\cf7 \strokec7 ,\cf6 \strokec6  testID\cf7 \strokec7 ,\cf6 \strokec6  style\cf7 \strokec7 ,\cf6 \strokec6  fullWidth \cf7 \strokec7 =\cf6 \strokec6  \cf4 \cb5 \strokec4 true\cf6 \cb5 \strokec6  \cf7 \strokec7 \}:\cf6 \strokec6  \cf14 \cb5 \strokec14 Props\cf7 \cb5 \strokec7 )\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  c \cf7 \strokec7 \}\cf6 \strokec6  \cf7 \strokec7 =\cf6 \strokec6  useTheme\cf7 \strokec7 ();\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  isDisabled \cf7 \strokec7 =\cf6 \strokec6  \cf7 \strokec7 !!\cf6 \strokec6 disabled \cf7 \strokec7 ||\cf6 \strokec6  \cf7 \strokec7 !!\cf6 \strokec6 loading\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\
+\cb5   \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  bg \cf7 \strokec7 =\cf6 \strokec6  variant \cf7 \strokec7 ===\cf6 \strokec6  \cf8 \strokec8 'primary'\cf6 \strokec6  \cf7 \strokec7 ?\cf6 \strokec6  c\cf7 \strokec7 .\cf6 \strokec6 brand \cf7 \strokec7 :\cf6 \strokec6  variant \cf7 \strokec7 ===\cf6 \strokec6  \cf8 \strokec8 'secondary'\cf6 \strokec6  \cf7 \strokec7 ?\cf6 \strokec6  c\cf7 \strokec7 .\cf6 \strokec6 brandSecondary \cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 'transparent'\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  fg \cf7 \strokec7 =\cf6 \strokec6  variant \cf7 \strokec7 ===\cf6 \strokec6  \cf8 \strokec8 'primary'\cf6 \strokec6  \cf7 \strokec7 ?\cf6 \strokec6  c\cf7 \strokec7 .\cf6 \strokec6 onBrand \cf7 \strokec7 :\cf6 \strokec6  variant \cf7 \strokec7 ===\cf6 \strokec6  \cf8 \strokec8 'secondary'\cf6 \strokec6  \cf7 \strokec7 ?\cf6 \strokec6  c\cf7 \strokec7 .\cf6 \strokec6 onBrandSecondary \cf7 \strokec7 :\cf6 \strokec6  c\cf7 \strokec7 .\cf6 \strokec6 onSurface\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  border \cf7 \strokec7 =\cf6 \strokec6  variant \cf7 \strokec7 ===\cf6 \strokec6  \cf8 \strokec8 'ghost'\cf6 \strokec6  \cf7 \strokec7 ?\cf6 \strokec6  c\cf7 \strokec7 .\cf6 \strokec6 borderStrong \cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 'transparent'\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\
+\cb5   \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  handle \cf7 \strokec7 =\cf6 \strokec6  \cf7 \strokec7 ()\cf6 \strokec6  \cf7 \strokec7 =>\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     \cf4 \cb5 \strokec4 if\cf6 \cb5 \strokec6  \cf7 \strokec7 (\cf6 \strokec6 isDisabled\cf7 \strokec7 )\cf6 \strokec6  \cf4 \cb5 \strokec4 return\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5     \cf4 \cb5 \strokec4 try\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  \cf14 \cb5 \strokec14 Haptics\cf7 \cb5 \strokec7 .\cf6 \strokec6 impactAsync\cf7 \strokec7 (\cf14 \cb5 \strokec14 Haptics\cf7 \cb5 \strokec7 .\cf14 \cb5 \strokec14 ImpactFeedbackStyle\cf7 \cb5 \strokec7 .\cf14 \cb5 \strokec14 Medium\cf7 \cb5 \strokec7 );\cf6 \strokec6  \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \cb5 \strokec4 catch\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\}\cf6 \cb1 \strokec6 \
+\cb5     onPress\cf7 \strokec7 ?.();\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \};\cf6 \cb1 \strokec6 \
+\
+\cb5   \cf4 \cb5 \strokec4 return\cf6 \cb5 \strokec6  \cf7 \strokec7 (\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 <\cf14 \cb5 \strokec14 Pressable\cf6 \cb1 \strokec6 \
+\cb5       testID\cf7 \strokec7 =\{\cf6 \strokec6 testID\cf7 \strokec7 \}\cf6 \cb1 \strokec6 \
+\cb5       onPress\cf7 \strokec7 =\{\cf6 \strokec6 handle\cf7 \strokec7 \}\cf6 \cb1 \strokec6 \
+\cb5       disabled\cf7 \strokec7 =\{\cf6 \strokec6 isDisabled\cf7 \strokec7 \}\cf6 \cb1 \strokec6 \
+\cb5       style\cf7 \strokec7 =\{(\{\cf6 \strokec6  pressed \cf7 \strokec7 \})\cf6 \strokec6  \cf7 \strokec7 =>\cf6 \strokec6  \cf7 \strokec7 [\cf6 \cb1 \strokec6 \
+\cb5         styles\cf7 \strokec7 .\cf6 \strokec6 btn\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5         \cf7 \strokec7 \{\cf6 \strokec6  backgroundColor\cf7 \strokec7 :\cf6 \strokec6  bg\cf7 \strokec7 ,\cf6 \strokec6  borderColor\cf7 \strokec7 :\cf6 \strokec6  border\cf7 \strokec7 ,\cf6 \strokec6  borderWidth\cf7 \strokec7 :\cf6 \strokec6  variant \cf7 \strokec7 ===\cf6 \strokec6  \cf8 \strokec8 'ghost'\cf6 \strokec6  \cf7 \strokec7 ?\cf6 \strokec6  \cf10 \strokec10 1\cf6 \strokec6  \cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 0\cf7 \strokec7 ,\cf6 \strokec6  opacity\cf7 \strokec7 :\cf6 \strokec6  isDisabled \cf7 \strokec7 ?\cf6 \strokec6  \cf10 \strokec10 0.5\cf6 \strokec6  \cf7 \strokec7 :\cf6 \strokec6  pressed \cf7 \strokec7 ?\cf6 \strokec6  \cf10 \strokec10 0.85\cf6 \strokec6  \cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 1\cf6 \strokec6  \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5         fullWidth \cf7 \strokec7 &&\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  alignSelf\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 'stretch'\cf6 \strokec6  \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5         style\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5       \cf7 \strokec7 ]\}\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 >\cf6 \cb1 \strokec6 \
+\cb5       \cf7 \strokec7 \{\cf6 \strokec6 loading \cf7 \strokec7 ?\cf6 \strokec6  \cf7 \strokec7 (\cf6 \cb1 \strokec6 \
+\cb5         \cf7 \strokec7 <\cf14 \cb5 \strokec14 ActivityIndicator\cf6 \cb5 \strokec6  color\cf7 \strokec7 =\{\cf6 \strokec6 fg\cf7 \strokec7 \}\cf6 \strokec6  />\cb1 \
+\cb5       \cf7 \strokec7 )\cf6 \strokec6  \cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 (\cf6 \cb1 \strokec6 \
+\cb5         \cf7 \strokec7 <\cf14 \cb5 \strokec14 Text\cf6 \cb5 \strokec6  style\cf7 \strokec7 =\{[\cf6 \strokec6 styles\cf7 \strokec7 .\cf6 \strokec6 text\cf7 \strokec7 ,\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  color\cf7 \strokec7 :\cf6 \strokec6  fg \cf7 \strokec7 \}]\}>\{\cf6 \strokec6 title\cf7 \strokec7 \}</\cf14 \cb5 \strokec14 Text\cf7 \cb5 \strokec7 >\cf6 \cb1 \strokec6 \
+\cb5       \cf7 \strokec7 )\}\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 </\cf14 \cb5 \strokec14 Pressable\cf7 \cb5 \strokec7 >\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 );\cf6 \cb1 \strokec6 \
+\cf7 \cb5 \strokec7 \}\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  styles \cf7 \strokec7 =\cf6 \strokec6  \cf14 \cb5 \strokec14 StyleSheet\cf7 \cb5 \strokec7 .\cf6 \strokec6 create\cf7 \strokec7 (\{\cf6 \cb1 \strokec6 \
+\cb5   btn\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     borderRadius\cf7 \strokec7 :\cf6 \strokec6  radius\cf7 \strokec7 .\cf6 \strokec6 md\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     paddingVertical\cf7 \strokec7 :\cf6 \strokec6  spacing\cf7 \strokec7 .\cf6 \strokec6 md \cf7 \strokec7 +\cf6 \strokec6  \cf10 \strokec10 2\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     paddingHorizontal\cf7 \strokec7 :\cf6 \strokec6  spacing\cf7 \strokec7 .\cf6 \strokec6 xl\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     alignItems\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 'center'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     justifyContent\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 'center'\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5     minHeight\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 48\cf7 \strokec7 ,\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5   text\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  fontSize\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 16\cf7 \strokec7 ,\cf6 \strokec6  fontWeight\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '500'\cf7 \strokec7 ,\cf6 \strokec6  letterSpacing\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 0.2\cf6 \strokec6  \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cf7 \cb5 \strokec7 \});\cf6 \cb1 \strokec6 \
+\cf8 \cb5 \strokec8 "\cf6 \cb1 \strokec6 \
+\
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs28 \cf11 \cb12 \strokec11 /app/frontend/src/components/ProductCard.tsx\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf8 \cb5 \strokec8 "import React from 'react';\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 import\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  \cf14 \cb5 \strokec14 Pressable\cf7 \cb5 \strokec7 ,\cf6 \strokec6  \cf14 \cb5 \strokec14 Text\cf7 \cb5 \strokec7 ,\cf6 \strokec6  \cf14 \cb5 \strokec14 StyleSheet\cf7 \cb5 \strokec7 ,\cf6 \strokec6  \cf14 \cb5 \strokec14 View\cf6 \cb5 \strokec6  \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \cb5 \strokec4 from\cf6 \cb5 \strokec6  \cf8 \strokec8 'react-native'\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 import\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  \cf14 \cb5 \strokec14 Image\cf6 \cb5 \strokec6  \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \cb5 \strokec4 from\cf6 \cb5 \strokec6  \cf8 \strokec8 'expo-image'\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 import\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  useRouter \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \cb5 \strokec4 from\cf6 \cb5 \strokec6  \cf8 \strokec8 'expo-router'\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 import\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  useTheme\cf7 \strokec7 ,\cf6 \strokec6  radius\cf7 \strokec7 ,\cf6 \strokec6  spacing\cf7 \strokec7 ,\cf6 \strokec6  shadow \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \cb5 \strokec4 from\cf6 \cb5 \strokec6  \cf8 \strokec8 '@/src/theme'\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 import\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  \cf14 \cb5 \strokec14 Product\cf6 \cb5 \strokec6  \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \cb5 \strokec4 from\cf6 \cb5 \strokec6  \cf8 \strokec8 '@/src/api/client'\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  \cf14 \cb5 \strokec14 PLACEHOLDER\cf6 \cb5 \strokec6  \cf7 \strokec7 =\cf6 \strokec6  \cf8 \strokec8 'https://images.pexels.com/photos/1571472/pexels-photo-1571472.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 export\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 function\cf6 \cb5 \strokec6  \cf14 \cb5 \strokec14 ProductCard\cf7 \cb5 \strokec7 (\{\cf6 \strokec6  product\cf7 \strokec7 ,\cf6 \strokec6  width \cf7 \strokec7 \}:\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  product\cf7 \strokec7 :\cf6 \strokec6  \cf14 \cb5 \strokec14 Product\cf7 \cb5 \strokec7 ;\cf6 \strokec6  width?: \cf4 \cb5 \strokec4 number\cf6 \cb5 \strokec6  \cf7 \strokec7 \})\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  c \cf7 \strokec7 \}\cf6 \strokec6  \cf7 \strokec7 =\cf6 \strokec6  useTheme\cf7 \strokec7 ();\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  router \cf7 \strokec7 =\cf6 \strokec6  useRouter\cf7 \strokec7 ();\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 return\cf6 \cb5 \strokec6  \cf7 \strokec7 (\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 <\cf14 \cb5 \strokec14 Pressable\cf6 \cb1 \strokec6 \
+\cb5       testID\cf7 \strokec7 =\{\cf8 \strokec8 `product-card-\cf7 \strokec7 $\{\cf6 \strokec6 product\cf7 \strokec7 .\cf6 \strokec6 id\cf7 \strokec7 \}\cf8 \strokec8 `\cf7 \strokec7 \}\cf6 \cb1 \strokec6 \
+\cb5       onPress\cf7 \strokec7 =\{()\cf6 \strokec6  \cf7 \strokec7 =>\cf6 \strokec6  router\cf7 \strokec7 .\cf6 \strokec6 push\cf7 \strokec7 (\cf8 \strokec8 `/product/\cf7 \strokec7 $\{\cf6 \strokec6 product\cf7 \strokec7 .\cf6 \strokec6 id\cf7 \strokec7 \}\cf8 \strokec8 `\cf6 \strokec6  \cf4 \cb5 \strokec4 as\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 any\cf7 \cb5 \strokec7 )\}\cf6 \cb1 \strokec6 \
+\cb5       style\cf7 \strokec7 =\{[\cf6 \strokec6 styles\cf7 \strokec7 .\cf6 \strokec6 card\cf7 \strokec7 ,\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  backgroundColor\cf7 \strokec7 :\cf6 \strokec6  c\cf7 \strokec7 .\cf6 \strokec6 surfaceSecondary\cf7 \strokec7 ,\cf6 \strokec6  borderColor\cf7 \strokec7 :\cf6 \strokec6  c\cf7 \strokec7 .\cf6 \strokec6 border \cf7 \strokec7 \},\cf6 \strokec6  width \cf7 \strokec7 ?\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  width \cf7 \strokec7 \}\cf6 \strokec6  \cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 null\cf7 \cb5 \strokec7 ,\cf6 \strokec6  shadow\cf7 \strokec7 .\cf6 \strokec6 sm\cf7 \strokec7 ]\}\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 >\cf6 \cb1 \strokec6 \
+\cb5       \cf7 \strokec7 <\cf14 \cb5 \strokec14 Image\cf6 \cb1 \strokec6 \
+\cb5         source\cf7 \strokec7 =\{\{\cf6 \strokec6  uri\cf7 \strokec7 :\cf6 \strokec6  product\cf7 \strokec7 .\cf6 \strokec6 image \cf7 \strokec7 ||\cf6 \strokec6  \cf14 \cb5 \strokec14 PLACEHOLDER\cf6 \cb5 \strokec6  \cf7 \strokec7 \}\}\cf6 \cb1 \strokec6 \
+\cb5         style\cf7 \strokec7 =\{\cf6 \strokec6 styles\cf7 \strokec7 .\cf6 \strokec6 image\cf7 \strokec7 \}\cf6 \cb1 \strokec6 \
+\cb5         contentFit\cf7 \strokec7 =\cf15 \cb5 \strokec15 \\\cf8 \cb5 \strokec8 "cover\\"\cf6 \cb1 \strokec6 \
+\cb5         transition\cf7 \strokec7 =\{\cf10 \strokec10 250\cf7 \strokec7 \}\cf6 \cb1 \strokec6 \
+\cb5       />\cb1 \
+\cb5       \cf7 \strokec7 <\cf14 \cb5 \strokec14 View\cf6 \cb5 \strokec6  style\cf7 \strokec7 =\{\cf6 \strokec6 styles\cf7 \strokec7 .\cf6 \strokec6 body\cf7 \strokec7 \}>\cf6 \cb1 \strokec6 \
+\cb5         \cf7 \strokec7 <\cf14 \cb5 \strokec14 Text\cf6 \cb5 \strokec6  style\cf7 \strokec7 =\{[\cf6 \strokec6 styles\cf7 \strokec7 .\cf6 \strokec6 store\cf7 \strokec7 ,\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  color\cf7 \strokec7 :\cf6 \strokec6  c\cf7 \strokec7 .\cf6 \strokec6 onSurfaceTertiary \cf7 \strokec7 \}]\}\cf6 \strokec6  numberOfLines\cf7 \strokec7 =\{\cf10 \strokec10 1\cf7 \strokec7 \}>\{\cf6 \strokec6 product\cf7 \strokec7 .\cf6 \strokec6 store_name\cf7 \strokec7 \}</\cf14 \cb5 \strokec14 Text\cf7 \cb5 \strokec7 >\cf6 \cb1 \strokec6 \
+\cb5         \cf7 \strokec7 <\cf14 \cb5 \strokec14 Text\cf6 \cb5 \strokec6  style\cf7 \strokec7 =\{[\cf6 \strokec6 styles\cf7 \strokec7 .\cf6 \strokec6 name\cf7 \strokec7 ,\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  color\cf7 \strokec7 :\cf6 \strokec6  c\cf7 \strokec7 .\cf6 \strokec6 onSurface \cf7 \strokec7 \}]\}\cf6 \strokec6  numberOfLines\cf7 \strokec7 =\{\cf10 \strokec10 1\cf7 \strokec7 \}>\{\cf6 \strokec6 product\cf7 \strokec7 .\cf6 \strokec6 name\cf7 \strokec7 \}</\cf14 \cb5 \strokec14 Text\cf7 \cb5 \strokec7 >\cf6 \cb1 \strokec6 \
+\cb5         \cf7 \strokec7 <\cf14 \cb5 \strokec14 Text\cf6 \cb5 \strokec6  style\cf7 \strokec7 =\{[\cf6 \strokec6 styles\cf7 \strokec7 .\cf6 \strokec6 price\cf7 \strokec7 ,\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  color\cf7 \strokec7 :\cf6 \strokec6  c\cf7 \strokec7 .\cf6 \strokec6 brand \cf7 \strokec7 \}]\}>\cf15 \cb5 \strokec15 \'80\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6 product\cf7 \strokec7 .\cf6 \strokec6 price\cf7 \strokec7 .\cf6 \strokec6 toFixed\cf7 \strokec7 (\cf10 \strokec10 2\cf7 \strokec7 )\}</\cf14 \cb5 \strokec14 Text\cf7 \cb5 \strokec7 >\cf6 \cb1 \strokec6 \
+\cb5       \cf7 \strokec7 </\cf14 \cb5 \strokec14 View\cf7 \cb5 \strokec7 >\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 </\cf14 \cb5 \strokec14 Pressable\cf7 \cb5 \strokec7 >\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 );\cf6 \cb1 \strokec6 \
+\cf7 \cb5 \strokec7 \}\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  styles \cf7 \strokec7 =\cf6 \strokec6  \cf14 \cb5 \strokec14 StyleSheet\cf7 \cb5 \strokec7 .\cf6 \strokec6 create\cf7 \strokec7 (\{\cf6 \cb1 \strokec6 \
+\cb5   card\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  borderRadius\cf7 \strokec7 :\cf6 \strokec6  radius\cf7 \strokec7 .\cf6 \strokec6 md\cf7 \strokec7 ,\cf6 \strokec6  overflow\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 'hidden'\cf7 \strokec7 ,\cf6 \strokec6  borderWidth\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 1\cf7 \strokec7 ,\cf6 \strokec6  marginBottom\cf7 \strokec7 :\cf6 \strokec6  spacing\cf7 \strokec7 .\cf6 \strokec6 md \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5   image\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  width\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '100%'\cf7 \strokec7 ,\cf6 \strokec6  aspectRatio\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 1\cf7 \strokec7 ,\cf6 \strokec6  backgroundColor\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '#eee'\cf6 \strokec6  \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5   body\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  padding\cf7 \strokec7 :\cf6 \strokec6  spacing\cf7 \strokec7 .\cf6 \strokec6 md \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5   store\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  fontSize\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 12\cf7 \strokec7 ,\cf6 \strokec6  marginBottom\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 2\cf6 \strokec6  \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5   name\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  fontSize\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 15\cf7 \strokec7 ,\cf6 \strokec6  fontWeight\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '500'\cf7 \strokec7 ,\cf6 \strokec6  marginBottom\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 4\cf6 \strokec6  \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cb5   price\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  fontSize\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 16\cf7 \strokec7 ,\cf6 \strokec6  fontWeight\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 '500'\cf6 \strokec6  \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cf7 \cb5 \strokec7 \});\cf6 \cb1 \strokec6 \
+\cf8 \cb5 \strokec8 "\cf6 \cb1 \strokec6 \
+\
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs28 \cf11 \cb12 \strokec11 /app/frontend/src/components/ScreenWrapper.tsx\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf8 \cb5 \strokec8 "import React from 'react';\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 import\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  \cf14 \cb5 \strokec14 View\cf7 \cb5 \strokec7 ,\cf6 \strokec6  \cf14 \cb5 \strokec14 StyleSheet\cf7 \cb5 \strokec7 ,\cf6 \strokec6  \cf14 \cb5 \strokec14 StatusBar\cf6 \cb5 \strokec6  \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \cb5 \strokec4 from\cf6 \cb5 \strokec6  \cf8 \strokec8 'react-native'\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 import\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  \cf14 \cb5 \strokec14 SafeAreaView\cf6 \cb5 \strokec6  \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \cb5 \strokec4 from\cf6 \cb5 \strokec6  \cf8 \strokec8 'react-native-safe-area-context'\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 import\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  useTheme \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \cb5 \strokec4 from\cf6 \cb5 \strokec6  \cf8 \strokec8 '@/src/theme'\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 export\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 function\cf6 \cb5 \strokec6  \cf14 \cb5 \strokec14 ScreenWrapper\cf7 \cb5 \strokec7 (\{\cf6 \strokec6  children\cf7 \strokec7 ,\cf6 \strokec6  edges \cf7 \strokec7 \}:\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  children\cf7 \strokec7 :\cf6 \strokec6  \cf14 \cb5 \strokec14 React\cf7 \cb5 \strokec7 .\cf14 \cb5 \strokec14 ReactNode\cf7 \cb5 \strokec7 ;\cf6 \strokec6  edges?: \cf7 \strokec7 (\cf8 \strokec8 'top'\cf6 \strokec6  \cf7 \strokec7 |\cf6 \strokec6  \cf8 \strokec8 'bottom'\cf6 \strokec6  \cf7 \strokec7 |\cf6 \strokec6  \cf8 \strokec8 'left'\cf6 \strokec6  \cf7 \strokec7 |\cf6 \strokec6  \cf8 \strokec8 'right'\cf7 \strokec7 )[]\cf6 \strokec6  \cf7 \strokec7 \})\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  c\cf7 \strokec7 ,\cf6 \strokec6  isDark \cf7 \strokec7 \}\cf6 \strokec6  \cf7 \strokec7 =\cf6 \strokec6  useTheme\cf7 \strokec7 ();\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 return\cf6 \cb5 \strokec6  \cf7 \strokec7 (\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 <\cf14 \cb5 \strokec14 SafeAreaView\cf6 \cb5 \strokec6  edges\cf7 \strokec7 =\{\cf6 \strokec6 edges \cf7 \strokec7 ??\cf6 \strokec6  \cf7 \strokec7 [\cf8 \strokec8 'top'\cf7 \strokec7 ]\}\cf6 \strokec6  style\cf7 \strokec7 =\{[\cf6 \strokec6 styles\cf7 \strokec7 .\cf6 \strokec6 flex\cf7 \strokec7 ,\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  backgroundColor\cf7 \strokec7 :\cf6 \strokec6  c\cf7 \strokec7 .\cf6 \strokec6 surface \cf7 \strokec7 \}]\}>\cf6 \cb1 \strokec6 \
+\cb5       \cf7 \strokec7 <\cf14 \cb5 \strokec14 StatusBar\cf6 \cb5 \strokec6  barStyle\cf7 \strokec7 =\{\cf6 \strokec6 isDark \cf7 \strokec7 ?\cf6 \strokec6  \cf8 \strokec8 'light-content'\cf6 \strokec6  \cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 'dark-content'\cf7 \strokec7 \}\cf6 \strokec6  />\cb1 \
+\cb5       \cf7 \strokec7 <\cf14 \cb5 \strokec14 View\cf6 \cb5 \strokec6  style\cf7 \strokec7 =\{[\cf6 \strokec6 styles\cf7 \strokec7 .\cf6 \strokec6 flex\cf7 \strokec7 ,\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  backgroundColor\cf7 \strokec7 :\cf6 \strokec6  c\cf7 \strokec7 .\cf6 \strokec6 surface \cf7 \strokec7 \}]\}>\{\cf6 \strokec6 children\cf7 \strokec7 \}</\cf14 \cb5 \strokec14 View\cf7 \cb5 \strokec7 >\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 </\cf14 \cb5 \strokec14 SafeAreaView\cf7 \cb5 \strokec7 >\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 );\cf6 \cb1 \strokec6 \
+\cf7 \cb5 \strokec7 \}\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  styles \cf7 \strokec7 =\cf6 \strokec6  \cf14 \cb5 \strokec14 StyleSheet\cf7 \cb5 \strokec7 .\cf6 \strokec6 create\cf7 \strokec7 (\{\cf6 \strokec6  flex\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  flex\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 1\cf6 \strokec6  \cf7 \strokec7 \}\cf6 \strokec6  \cf7 \strokec7 \});\cf6 \cb1 \strokec6 \
+\cf8 \cb5 \strokec8 "\cf6 \cb1 \strokec6 \
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs28 \cf11 \cb12 \strokec11 /app/frontend/tsconfig.json\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf13 \cb5 \strokec13 "\{\cf6 \cb1 \strokec6 \
+\cf13 \cb5 \strokec13   \\"extends\\": \\"expo/tsconfig.base\\",\cf6 \cb1 \strokec6 \
+\cf13 \cb5 \strokec13   \\"compilerOptions\\": \{\cf6 \cb1 \strokec6 \
+\cf13 \cb5 \strokec13     \\"strict\\": true,\cf6 \cb1 \strokec6 \
+\cf13 \cb5 \strokec13     \\"paths\\": \{\cf6 \cb1 \strokec6 \
+\cf13 \cb5 \strokec13       \\"@/*\\": [\\"./*\\"]\cf6 \cb1 \strokec6 \
+\cf13 \cb5 \strokec13     \}\cf6 \cb1 \strokec6 \
+\cf13 \cb5 \strokec13   \},\cf6 \cb1 \strokec6 \
+\cf13 \cb5 \strokec13   \\"include\\": [\\"**/*.ts\\", \\"**/*.tsx\\", \\".expo/types/**/*.ts\\", \\"expo-env.d.ts\\"]\cf6 \cb1 \strokec6 \
+\cf13 \cb5 \strokec13 \}\cf6 \cb1 \strokec6 \
+\cf13 \cb5 \strokec13 "\cf6 \cb1 \strokec6 \
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs28 \cf11 \cb12 \strokec11 /app/frontend/app/_layout.tsx\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf8 \cb5 \strokec8 "import \{ Stack \} from \\"expo-router\\";\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 import\cf6 \cb5 \strokec6  \cf7 \strokec7 *\cf6 \strokec6  \cf4 \cb5 \strokec4 as\cf6 \cb5 \strokec6  \cf14 \cb5 \strokec14 SplashScreen\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 from\cf6 \cb5 \strokec6  \cf15 \cb5 \strokec15 \\\cf8 \cb5 \strokec8 "expo-splash-screen\\";\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 import\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  useEffect \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \cb5 \strokec4 from\cf6 \cb5 \strokec6  \cf15 \cb5 \strokec15 \\\cf8 \cb5 \strokec8 "react\\";\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 import\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  \cf14 \cb5 \strokec14 GestureHandlerRootView\cf6 \cb5 \strokec6  \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \cb5 \strokec4 from\cf6 \cb5 \strokec6  \cf15 \cb5 \strokec15 \\\cf8 \cb5 \strokec8 "react-native-gesture-handler\\";\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 import\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  \cf14 \cb5 \strokec14 SafeAreaProvider\cf6 \cb5 \strokec6  \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \cb5 \strokec4 from\cf6 \cb5 \strokec6  \cf15 \cb5 \strokec15 \\\cf8 \cb5 \strokec8 "react-native-safe-area-context\\";\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 import\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  useIconFonts \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \cb5 \strokec4 from\cf6 \cb5 \strokec6  \cf15 \cb5 \strokec15 \\\cf8 \cb5 \strokec8 "@/src/hooks/use-icon-fonts\\";\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 import\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  \cf14 \cb5 \strokec14 AuthProvider\cf6 \cb5 \strokec6  \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \cb5 \strokec4 from\cf6 \cb5 \strokec6  \cf15 \cb5 \strokec15 \\\cf8 \cb5 \strokec8 "@/src/context/AuthContext\\";\cf6 \cb1 \strokec6 \
+\
+\cf14 \cb5 \strokec14 SplashScreen\cf7 \cb5 \strokec7 .\cf6 \strokec6 preventAutoHideAsync\cf7 \strokec7 ();\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 export\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 default\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 function\cf6 \cb5 \strokec6  \cf14 \cb5 \strokec14 RootLayout\cf7 \cb5 \strokec7 ()\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  \cf7 \strokec7 [\cf6 \strokec6 loaded\cf7 \strokec7 ,\cf6 \strokec6  error\cf7 \strokec7 ]\cf6 \strokec6  \cf7 \strokec7 =\cf6 \strokec6  useIconFonts\cf7 \strokec7 ();\cf6 \cb1 \strokec6 \
+\
+\cb5   useEffect\cf7 \strokec7 (()\cf6 \strokec6  \cf7 \strokec7 =>\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     \cf4 \cb5 \strokec4 if\cf6 \cb5 \strokec6  \cf7 \strokec7 (\cf6 \strokec6 loaded \cf7 \strokec7 ||\cf6 \strokec6  error\cf7 \strokec7 )\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5       \cf14 \cb5 \strokec14 SplashScreen\cf7 \cb5 \strokec7 .\cf6 \strokec6 hideAsync\cf7 \strokec7 ();\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 \}\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \},\cf6 \strokec6  \cf7 \strokec7 [\cf6 \strokec6 loaded\cf7 \strokec7 ,\cf6 \strokec6  error\cf7 \strokec7 ]);\cf6 \cb1 \strokec6 \
+\
+\cb5   \cf4 \cb5 \strokec4 if\cf6 \cb5 \strokec6  \cf7 \strokec7 (!\cf6 \strokec6 loaded \cf7 \strokec7 &&\cf6 \strokec6  \cf7 \strokec7 !\cf6 \strokec6 error\cf7 \strokec7 )\cf6 \strokec6  \cf4 \cb5 \strokec4 return\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 null\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\
+\cb5   \cf4 \cb5 \strokec4 return\cf6 \cb5 \strokec6  \cf7 \strokec7 (\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 <\cf14 \cb5 \strokec14 GestureHandlerRootView\cf6 \cb5 \strokec6  style\cf7 \strokec7 =\{\{\cf6 \strokec6  flex\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 1\cf6 \strokec6  \cf7 \strokec7 \}\}>\cf6 \cb1 \strokec6 \
+\cb5       \cf7 \strokec7 <\cf14 \cb5 \strokec14 SafeAreaProvider\cf7 \cb5 \strokec7 >\cf6 \cb1 \strokec6 \
+\cb5         \cf7 \strokec7 <\cf14 \cb5 \strokec14 AuthProvider\cf7 \cb5 \strokec7 >\cf6 \cb1 \strokec6 \
+\cb5           \cf7 \strokec7 <\cf14 \cb5 \strokec14 Stack\cf6 \cb5 \strokec6  screenOptions\cf7 \strokec7 =\{\{\cf6 \strokec6  headerShown\cf7 \strokec7 :\cf6 \strokec6  \cf4 \cb5 \strokec4 false\cf6 \cb5 \strokec6  \cf7 \strokec7 \}\}\cf6 \strokec6  />\cb1 \
+\cb5         \cf7 \strokec7 </\cf14 \cb5 \strokec14 AuthProvider\cf7 \cb5 \strokec7 >\cf6 \cb1 \strokec6 \
+\cb5       \cf7 \strokec7 </\cf14 \cb5 \strokec14 SafeAreaProvider\cf7 \cb5 \strokec7 >\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 </\cf14 \cb5 \strokec14 GestureHandlerRootView\cf7 \cb5 \strokec7 >\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 );\cf6 \cb1 \strokec6 \
+\cf7 \cb5 \strokec7 \}\cf6 \cb1 \strokec6 \
+\cf8 \cb5 \strokec8 "\cf6 \cb1 \strokec6 \
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs28 \cf11 \cb12 \strokec11 /app/frontend/app/index.tsx\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf8 \cb5 \strokec8 "import \{ useEffect \} from 'react';\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 import\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  \cf14 \cb5 \strokec14 View\cf7 \cb5 \strokec7 ,\cf6 \strokec6  \cf14 \cb5 \strokec14 ActivityIndicator\cf7 \cb5 \strokec7 ,\cf6 \strokec6  \cf14 \cb5 \strokec14 StyleSheet\cf6 \cb5 \strokec6  \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \cb5 \strokec4 from\cf6 \cb5 \strokec6  \cf8 \strokec8 'react-native'\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 import\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  useRouter \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \cb5 \strokec4 from\cf6 \cb5 \strokec6  \cf8 \strokec8 'expo-router'\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 import\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  useAuth \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \cb5 \strokec4 from\cf6 \cb5 \strokec6  \cf8 \strokec8 '@/src/context/AuthContext'\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cf4 \cb5 \strokec4 import\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  useTheme \cf7 \strokec7 \}\cf6 \strokec6  \cf4 \cb5 \strokec4 from\cf6 \cb5 \strokec6  \cf8 \strokec8 '@/src/theme'\cf7 \strokec7 ;\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 export\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 default\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 function\cf6 \cb5 \strokec6  \cf14 \cb5 \strokec14 Index\cf7 \cb5 \strokec7 ()\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  user\cf7 \strokec7 ,\cf6 \strokec6  loading \cf7 \strokec7 \}\cf6 \strokec6  \cf7 \strokec7 =\cf6 \strokec6  useAuth\cf7 \strokec7 ();\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  router \cf7 \strokec7 =\cf6 \strokec6  useRouter\cf7 \strokec7 ();\cf6 \cb1 \strokec6 \
+\cb5   \cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  c \cf7 \strokec7 \}\cf6 \strokec6  \cf7 \strokec7 =\cf6 \strokec6  useTheme\cf7 \strokec7 ();\cf6 \cb1 \strokec6 \
+\
+\cb5   useEffect\cf7 \strokec7 (()\cf6 \strokec6  \cf7 \strokec7 =>\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \cb1 \strokec6 \
+\cb5     \cf4 \cb5 \strokec4 if\cf6 \cb5 \strokec6  \cf7 \strokec7 (\cf6 \strokec6 loading\cf7 \strokec7 )\cf6 \strokec6  \cf4 \cb5 \strokec4 return\cf7 \cb5 \strokec7 ;\cf6 \cb1 \strokec6 \
+\cb5     \cf4 \cb5 \strokec4 if\cf6 \cb5 \strokec6  \cf7 \strokec7 (\cf6 \strokec6 user\cf7 \strokec7 )\cf6 \strokec6  router\cf7 \strokec7 .\cf6 \strokec6 replace\cf7 \strokec7 (\cf8 \strokec8 '/(tabs)'\cf6 \strokec6  \cf4 \cb5 \strokec4 as\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 any\cf7 \cb5 \strokec7 );\cf6 \cb1 \strokec6 \
+\cb5     \cf4 \cb5 \strokec4 else\cf6 \cb5 \strokec6  router\cf7 \strokec7 .\cf6 \strokec6 replace\cf7 \strokec7 (\cf8 \strokec8 '/(auth)/login'\cf6 \strokec6  \cf4 \cb5 \strokec4 as\cf6 \cb5 \strokec6  \cf4 \cb5 \strokec4 any\cf7 \cb5 \strokec7 );\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 \},\cf6 \strokec6  \cf7 \strokec7 [\cf6 \strokec6 user\cf7 \strokec7 ,\cf6 \strokec6  loading\cf7 \strokec7 ,\cf6 \strokec6  router\cf7 \strokec7 ]);\cf6 \cb1 \strokec6 \
+\
+\cb5   \cf4 \cb5 \strokec4 return\cf6 \cb5 \strokec6  \cf7 \strokec7 (\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 <\cf14 \cb5 \strokec14 View\cf6 \cb5 \strokec6  style\cf7 \strokec7 =\{[\cf6 \strokec6 styles\cf7 \strokec7 .\cf6 \strokec6 container\cf7 \strokec7 ,\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  backgroundColor\cf7 \strokec7 :\cf6 \strokec6  c\cf7 \strokec7 .\cf6 \strokec6 surface \cf7 \strokec7 \}]\}>\cf6 \cb1 \strokec6 \
+\cb5       \cf7 \strokec7 <\cf14 \cb5 \strokec14 ActivityIndicator\cf6 \cb5 \strokec6  color\cf7 \strokec7 =\{\cf6 \strokec6 c\cf7 \strokec7 .\cf6 \strokec6 brand\cf7 \strokec7 \}\cf6 \strokec6  size\cf7 \strokec7 =\cf15 \cb5 \strokec15 \\\cf8 \cb5 \strokec8 "large\\" />\cf6 \cb1 \strokec6 \
+\cb5     \cf7 \strokec7 </\cf14 \cb5 \strokec14 View\cf7 \cb5 \strokec7 >\cf6 \cb1 \strokec6 \
+\cb5   \cf7 \strokec7 );\cf6 \cb1 \strokec6 \
+\cf7 \cb5 \strokec7 \}\cf6 \cb1 \strokec6 \
+\
+\cf4 \cb5 \strokec4 const\cf6 \cb5 \strokec6  styles \cf7 \strokec7 =\cf6 \strokec6  \cf14 \cb5 \strokec14 StyleSheet\cf7 \cb5 \strokec7 .\cf6 \strokec6 create\cf7 \strokec7 (\{\cf6 \cb1 \strokec6 \
+\cb5   container\cf7 \strokec7 :\cf6 \strokec6  \cf7 \strokec7 \{\cf6 \strokec6  flex\cf7 \strokec7 :\cf6 \strokec6  \cf10 \strokec10 1\cf7 \strokec7 ,\cf6 \strokec6  alignItems\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 'center'\cf7 \strokec7 ,\cf6 \strokec6  justifyContent\cf7 \strokec7 :\cf6 \strokec6  \cf8 \strokec8 'center'\cf6 \strokec6  \cf7 \strokec7 \},\cf6 \cb1 \strokec6 \
+\cf7 \cb5 \strokec7 \});\cf6 \cb1 \strokec6 \
+\cf8 \cb5 \strokec8 "\cf6 \cb1 \strokec6 \
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs21 \cf11 \strokec11 \
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs24 \cf16 \strokec16 \
+\pard\pardeftab720\partightenfactor0
+
+\f3 \cf6 \strokec6 \
+\
+\pard\pardeftab720\partightenfactor0
+
+\f1 \cf6 \strokec6 \
+\pard\pardeftab720\qr\partightenfactor0
+\cf17 \cb5 \strokec17 1\cb1 \
+\cf18 \cb5 \strokec18 2\cb1 \
+\cb5 3\cb1 \
+\cb5 4\cb1 \
+\cb5 5\cb1 \
+\cb5 6\cb1 \
+\cb5 7\cb1 \
+\cb5 8\cb1 \
+\cb5 9\cb1 \
+\cb5 10\cb1 \
+\cb5 11\cb1 \
+\cb5 12\cb1 \
+\cb5 13\cb1 \
+\cb5 14\cb1 \
+\cb5 15\cb1 \
+\cb5 16\cb1 \
+\cb5 17\cb1 \
+\cb5 18\cb1 \
+\cb5 19\cb1 \
+\cb5 20\cb1 \
+\cb5 21\cb1 \
+\cb5 22\cb1 \
+\cb5 23\cb1 \
+\pard\pardeftab720\partightenfactor0
+
+\f3 \cf6 \strokec6 \
+\pard\pardeftab720\partightenfactor0
+
+\f1 \cf6 \strokec6 \
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f3 \cf6 \strokec6 \
+\
+\pard\pardeftab720\partightenfactor0
+
+\f1 \cf6 \strokec6 \
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs21 \cf11 \strokec11 \
+
+\f2\fs24 \cf16 \strokec16 \
+\pard\pardeftab720\partightenfactor0
+
+\f3 \cf6 \strokec6 \
+\
+\pard\pardeftab720\partightenfactor0
+
+\f1 \cf6 \strokec6 \
+\pard\pardeftab720\qr\partightenfactor0
+\cf17 \cb5 \strokec17 1\cb1 \
+\cf18 \cb5 \strokec18 2\cb1 \
+\cb5 3\cb1 \
+\cb5 4\cb1 \
+\cb5 5\cb1 \
+\cb5 6\cb1 \
+\cb5 7\cb1 \
+\cb5 8\cb1 \
+\cb5 9\cb1 \
+\cb5 10\cb1 \
+\cb5 11\cb1 \
+\cb5 12\cb1 \
+\cb5 13\cb1 \
+\cb5 14\cb1 \
+\cb5 15\cb1 \
+\cb5 16\cb1 \
+\cb5 17\cb1 \
+\cb5 18\cb1 \
+\cb5 19\cb1 \
+\cb5 20\cb1 \
+\cb5 21\cb1 \
+\cb5 22\cb1 \
+\cb5 23\cb1 \
+\pard\pardeftab720\partightenfactor0
+
+\f3 \cf6 \strokec6 \
+\pard\pardeftab720\partightenfactor0
+
+\f1 \cf6 \strokec6 \
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f3 \cf6 \strokec6 \
+\
+\pard\pardeftab720\partightenfactor0
+
+\f1 \cf6 \strokec6 \
+\
+}
